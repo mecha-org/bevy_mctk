@@ -121,7 +121,6 @@ pub fn init(
     asset_server: Res<AssetServer>,
     mut query: Query<(Entity, &StyledButton)>,
 ) {
-    println!("init()");
     for (entity, button) in query.iter_mut() {
         let mut command = commands.entity(entity);
 
