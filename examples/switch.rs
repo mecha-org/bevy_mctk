@@ -74,7 +74,6 @@ fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
 
     let on_toogle_theme_mode = commands.register_system(update_light_dark_theme);
 
-
     // Example theme change handlers (register your real handlers)
     let on_default_theme = commands.register_system(set_theme(Theme::Default));
     let on_red_theme = commands.register_system(set_theme(Theme::Red));
@@ -101,8 +100,8 @@ fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
         RootWindow,
         TabGroup::default(),
         Children::spawn((
-             // Theme selection row
-             Spawn((
+            // Theme selection row
+            Spawn((
                 Node {
                     display: Display::Flex,
                     flex_direction: FlexDirection::Row,
@@ -183,13 +182,11 @@ fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
                     ..default()
                 },
                 Children::spawn((
-                     Spawn((
-                        StyledText::builder()
+                    Spawn((StyledText::builder()
                         .content("Mode Switch")
                         .font_size(14.0)
-                        .build(),
-                     )),
-                     Spawn(
+                        .build(),)),
+                    Spawn(
                         StyledSwitch::builder()
                             .variant(SwitchVariant::Rounded)
                             .state(true)
@@ -263,7 +260,7 @@ fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
                     Spawn(
                         StyledText::builder()
                             .content("Small")
-                            .font_size(14.0)                            
+                            .font_size(14.0)
                             .build(),
                     ),
                     Spawn(
@@ -327,15 +324,13 @@ fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
                     column_gap: Val::Px(6.0),
                     ..default()
                 },
-                Children::spawn((                   
-                    Spawn(
-                        StyledSwitch::builder()
-                            .variant(SwitchVariant::Rounded)
-                            .state(true)
-                            .disabled()
-                            .build(),
-                    ),
-                )),
+                Children::spawn((Spawn(
+                    StyledSwitch::builder()
+                        .variant(SwitchVariant::Rounded)
+                        .state(true)
+                        .disabled()
+                        .build(),
+                ),)),
             )),
         )),
     ));

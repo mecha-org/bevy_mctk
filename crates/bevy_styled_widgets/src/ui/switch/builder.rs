@@ -129,7 +129,12 @@ impl SwitchBuilder {
         let child_nodes = match self.variant {
             SwitchVariant::Rounded => {
                 let track_color = if is_disabled {
-                    theme_manager.styles.switches.rounded.off_background.with_alpha(10.0)
+                    theme_manager
+                        .styles
+                        .switches
+                        .rounded
+                        .off_background
+                        .with_alpha(10.0)
                 } else if is_on {
                     self.on_color
                         .unwrap_or(theme_manager.styles.switches.rounded.on_background)
@@ -137,9 +142,14 @@ impl SwitchBuilder {
                     self.off_color
                         .unwrap_or(theme_manager.styles.switches.rounded.off_background)
                 };
-        
+
                 let knob_color = if is_disabled {
-                    theme_manager.styles.switches.rounded.knob_color.with_alpha(10.0)
+                    theme_manager
+                        .styles
+                        .switches
+                        .rounded
+                        .knob_color
+                        .with_alpha(10.0)
                 } else {
                     self.knob_color
                         .unwrap_or(theme_manager.styles.switches.rounded.knob_color)
@@ -184,37 +194,55 @@ impl SwitchBuilder {
                                 ..default()
                             },
                             TextColor(
-                                self.text_color.unwrap_or(
-                                    theme_manager
-                                        .styles
-                                        .switches
-                                        .rounded
-                                        .text_color,
-                                    ),
-                                ),
-                            )),
+                                self.text_color
+                                    .unwrap_or(theme_manager.styles.switches.rounded.text_color),
+                            ),
                         )),
                     )),
-                ))
-            },            
+                )),))
+            }
 
             SwitchVariant::RectangularWithText => {
-               
                 let track_color = if is_disabled {
-                    theme_manager.styles.switches.rectangular_with_text.off_background.with_alpha(0.2)
+                    theme_manager
+                        .styles
+                        .switches
+                        .rectangular_with_text
+                        .off_background
+                        .with_alpha(0.2)
                 } else if is_on {
-                    self.on_color
-                        .unwrap_or(theme_manager.styles.switches.rectangular_with_text.on_background)
+                    self.on_color.unwrap_or(
+                        theme_manager
+                            .styles
+                            .switches
+                            .rectangular_with_text
+                            .on_background,
+                    )
                 } else {
-                    self.off_color
-                        .unwrap_or(theme_manager.styles.switches.rectangular_with_text.off_background)
+                    self.off_color.unwrap_or(
+                        theme_manager
+                            .styles
+                            .switches
+                            .rectangular_with_text
+                            .off_background,
+                    )
                 };
-        
+
                 let knob_color = if is_disabled {
-                    theme_manager.styles.switches.rectangular_with_text.knob_color.with_alpha(10.0)
+                    theme_manager
+                        .styles
+                        .switches
+                        .rectangular_with_text
+                        .knob_color
+                        .with_alpha(10.0)
                 } else {
-                    self.knob_color
-                        .unwrap_or(theme_manager.styles.switches.rectangular_with_text.knob_color)
+                    self.knob_color.unwrap_or(
+                        theme_manager
+                            .styles
+                            .switches
+                            .rectangular_with_text
+                            .knob_color,
+                    )
                 };
 
                 let text = if is_on {
@@ -275,13 +303,12 @@ impl SwitchBuilder {
                                         .switches
                                         .rectangular_with_text
                                         .text_color,
-                                    ),
                                 ),
-                            )),
+                            ),
                         )),
                     )),
-                ))
-            } 
+                )),))
+            }
         };
 
         (

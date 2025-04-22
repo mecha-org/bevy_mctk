@@ -20,9 +20,7 @@ pub fn update_switch_colors(
             Has<InteractionDisabled>,
             &Children,
         ),
-        (
-            With<RootComponent>,
-        ),
+        (With<RootComponent>,),
     >,
     mut q_border_color: Query<
         (&mut BorderColor, &mut BackgroundColor, &mut Children),
@@ -100,7 +98,7 @@ pub fn update_switch_colors(
         }
 
         if switch.disabled {
-           continue; // Skip updating visuals or responding to events
+            continue; // Skip updating visuals or responding to events
         }
 
         if *checked {
