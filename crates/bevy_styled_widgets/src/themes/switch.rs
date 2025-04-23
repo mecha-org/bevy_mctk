@@ -8,9 +8,13 @@ pub struct SwitchStyle {
     pub on_background: Color,
     pub off_background: Color,
     pub hovered_background: Color,
-    pub text_color: Color,
+    pub on_text_color: Color,
+    pub off_text_color: Color,
     pub border_color: Color,
     pub knob_color: Color,
+    pub disabled_knob_color: Color,
+    pub disabled_on_background: Color,
+    pub disabled_off_background: Color,
 
     // Dimensions
     pub border_width: f32,
@@ -19,31 +23,54 @@ pub struct SwitchStyle {
     pub transition_duration: f32,
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct SwitchStyleAlphas {
+    pub disabled_knob_alpha: f32,
+    pub disabled_on_alpha: f32,
+    pub disabled_off_alpha: f32,
+    pub hovered_alpha: f32,
+}
+
 #[derive(Debug, Clone)]
 pub struct SwitchVariantStyles {
     pub rounded: SwitchStyle,
-    pub rectangular_with_text: SwitchStyle,
+    pub rectangular: SwitchStyle,
 }
 
 impl SwitchVariantStyles {
     pub fn from_colors(colors: ThemeColors) -> Self {
+        let alphas = SwitchStyleAlphas {
+            disabled_knob_alpha: 10.0,
+            disabled_on_alpha: 0.5,
+            disabled_off_alpha: 0.5,
+            hovered_alpha: 0.5,
+        };
+
         Self {
             rounded: SwitchStyle {
                 on_background: colors.primary,
                 off_background: colors.input,
                 knob_color: colors.background,
-                hovered_background: colors.primary.with_alpha(0.5),
-                text_color: colors.primary_foreground,
+                disabled_knob_color: colors.background.with_alpha(alphas.disabled_knob_alpha),
+                disabled_on_background: colors.primary.with_alpha(alphas.disabled_on_alpha),
+                disabled_off_background: colors.input.with_alpha(alphas.disabled_off_alpha),
+                hovered_background: colors.primary.with_alpha(alphas.hovered_alpha),
+                on_text_color: colors.primary_foreground,
+                off_text_color: colors.foreground,
                 border_color: Color::NONE,
                 border_width: 0.0,
                 transition_duration: 0.2,
             },
-            rectangular_with_text: SwitchStyle {
+            rectangular: SwitchStyle {
                 on_background: colors.primary,
                 off_background: colors.input,
                 knob_color: colors.background,
-                hovered_background: colors.primary.with_alpha(0.5),
-                text_color: colors.primary_foreground,
+                disabled_knob_color: colors.background.with_alpha(alphas.disabled_knob_alpha),
+                disabled_on_background: colors.primary.with_alpha(alphas.disabled_on_alpha),
+                disabled_off_background: colors.input.with_alpha(alphas.disabled_off_alpha),
+                hovered_background: colors.primary.with_alpha(alphas.hovered_alpha),
+                on_text_color: colors.primary_foreground,
+                off_text_color: colors.foreground,
                 border_color: Color::NONE,
                 border_width: 0.0,
                 transition_duration: 0.2,
@@ -54,10 +81,6 @@ impl SwitchVariantStyles {
 
 #[derive(Debug, Clone)]
 pub struct SwitchSizeProperties {
-    pub padding_horizontal: f32,
-    pub padding_vertical: f32,
-    pub font_size: f32,
-    pub icon_size: f32,
     pub track_border_width: f32,
     pub track_corner_radius: f32,
     pub track_width: f32,
@@ -85,10 +108,6 @@ pub struct SwitchSizeStyles {
 pub fn switch_sizes() -> SwitchSizeStyles {
     SwitchSizeStyles {
         xsmall: SwitchSizeProperties {
-            padding_horizontal: 4.0,
-            padding_vertical: 2.0,
-            font_size: 10.0,
-            icon_size: 10.0,
             track_border_width: 0.0,
             track_corner_radius: 6.0,
             track_width: 24.0,
@@ -103,10 +122,6 @@ pub fn switch_sizes() -> SwitchSizeStyles {
             label_offset: 12.0,
         },
         small: SwitchSizeProperties {
-            padding_horizontal: 6.0,
-            padding_vertical: 3.0,
-            font_size: 12.0,
-            icon_size: 12.0,
             track_border_width: 0.0,
             track_corner_radius: 8.0,
             track_width: 32.0,
@@ -121,10 +136,6 @@ pub fn switch_sizes() -> SwitchSizeStyles {
             label_offset: 17.0,
         },
         medium: SwitchSizeProperties {
-            padding_horizontal: 8.0,
-            padding_vertical: 4.0,
-            font_size: 14.0,
-            icon_size: 14.0,
             track_border_width: 0.0,
             track_corner_radius: 10.0,
             track_width: 40.0,
@@ -139,10 +150,6 @@ pub fn switch_sizes() -> SwitchSizeStyles {
             label_offset: 22.0,
         },
         large: SwitchSizeProperties {
-            padding_horizontal: 10.0,
-            padding_vertical: 5.0,
-            font_size: 16.0,
-            icon_size: 16.0,
             track_border_width: 0.0,
             track_corner_radius: 13.0,
             track_width: 48.0,
@@ -157,10 +164,6 @@ pub fn switch_sizes() -> SwitchSizeStyles {
             label_offset: 26.0,
         },
         xlarge: SwitchSizeProperties {
-            padding_horizontal: 12.0,
-            padding_vertical: 6.0,
-            font_size: 18.0,
-            icon_size: 18.0,
             track_border_width: 0.0,
             track_corner_radius: 16.0,
             track_width: 56.0,

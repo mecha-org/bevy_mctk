@@ -30,7 +30,7 @@ pub fn update_switch_colors(
         (&mut BackgroundColor, &mut Node),
         (Without<Children>, Without<RootComponent>, Without<Text>),
     >,
-    mut q_text: Query<(&mut Text, &mut Node)>,
+    mut q_text: Query<(&mut Text, &mut Node, &mut TextColor)>,
 ) {
     for (switch, Hovering(is_hovering), Checked(checked), is_disabled, children) in query.iter_mut()
     {
@@ -40,7 +40,7 @@ pub fn update_switch_colors(
         // Select switch style based on variant
         let switch_style = match switch.variant {
             SwitchVariant::Rounded => switch_styles.rounded,
-            SwitchVariant::RectangularWithText => switch_styles.rectangular_with_text,
+            SwitchVariant::Rectangular => switch_styles.rectangular,
         };
 
         //Update size styles
@@ -63,12 +63,16 @@ pub fn update_switch_colors(
         };
 
         match (is_disabled, *checked, is_hovering) {
-            (true, _, _) => {
-                bg_color.0 = switch_style.off_background;
+            (true, true, _) => {
+                bg_color.0 = switch_style.disabled_on_background;
+                border_color.0 = switch_style.border_color;
+            }
+            (true, false, _) => {
+                bg_color.0 = switch_style.disabled_off_background;
                 border_color.0 = switch_style.border_color;
             }
             (_, true, true) => {
-                bg_color.0 = switch_style.on_background;
+                bg_color.0 = switch_style.hovered_background;
                 border_color.0 = switch_style.border_color;
             }
             (_, false, true) => {
@@ -80,7 +84,7 @@ pub fn update_switch_colors(
                 border_color.0 = switch_style.border_color;
             }
             (_, false, false) => {
-                bg_color.0 = switch_style.off_background.with_alpha(0.5);
+                bg_color.0 = switch_style.off_background;
                 border_color.0 = switch_style.border_color;
             }
         }
@@ -93,11 +97,7 @@ pub fn update_switch_colors(
         };
 
         if switch.disabled {
-            bg_color.0 = switch_style.off_background.with_alpha(10.0); // fade background
-            knob_bg.0 = switch_style.knob_color.with_alpha(10.0);
-        }
-
-        if switch.disabled {
+            knob_bg.0 = switch_style.disabled_knob_color;
             continue; // Skip updating visuals or responding to events
         }
 
@@ -109,7 +109,7 @@ pub fn update_switch_colors(
             node.left = ui::Val::Px(switch_size_style.knob_offset_x)
         };
 
-        if switch.variant == SwitchVariant::RectangularWithText {
+        if switch.variant == SwitchVariant::Rectangular {
             // label
             let label = if *checked {
                 switch.on_label.clone().unwrap_or("ON".into())
@@ -118,16 +118,23 @@ pub fn update_switch_colors(
             };
 
             let label_id = track_children[1];
-            if let Ok((mut text, mut node)) = q_text.get_mut(label_id) {
+            if let Ok((mut text, mut node, mut text_color)) = q_text.get_mut(label_id) {
                 **text = if *checked {
                     label.to_string()
                 } else {
                     label.to_string()
                 };
+
                 node.left = if *checked {
                     Val::Px(switch_size_style.label_offset_on)
                 } else {
                     Val::Px(switch_size_style.label_offset)
+                };
+
+                text_color.0 = if *checked {
+                    switch_style.on_text_color
+                } else {
+                    switch_style.off_text_color
                 };
             }
         }
@@ -150,7 +157,7 @@ pub fn on_switch_changed(
         if styled_switch.disabled {
             commands.entity(entity).insert(InteractionDisabled);
         }
-        if let Some(system_id) = styled_switch.on_switch {
+        if let Some(system_id) = styled_switch.on_change {
             // Defer the callback system using commands
             commands.run_system_with(system_id, (entity, checked));
         }

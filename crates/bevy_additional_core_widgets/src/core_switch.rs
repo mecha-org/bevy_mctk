@@ -12,7 +12,7 @@ use bevy_core_widgets::{Checked, InteractionDisabled, ValueChange};
 #[derive(Component, Debug)]
 #[require(AccessibilityNode(accesskit::Node::new(Role::Switch)), Checked)]
 pub struct CoreSwitch {
-    pub on_switch: Option<SystemId<In<(Entity, bool)>>>,
+    pub on_change: Option<SystemId<In<(Entity, bool)>>>,
 }
 
 fn switch_on_key_input(
@@ -32,8 +32,8 @@ fn switch_on_key_input(
             let new_checked = !is_on;
             let entity = trigger.target();
 
-            if let Some(on_switch) = switch.on_switch {
-                commands.run_system_with(on_switch, (entity, new_checked));
+            if let Some(on_change) = switch.on_change {
+                commands.run_system_with(on_change, (entity, new_checked));
             } else {
                 commands.trigger_targets(ValueChange(new_checked), entity);
             }
@@ -58,8 +58,8 @@ fn switch_on_pointer_click(
             let is_on = checked.0;
             let new_checked = !is_on;
 
-            if let Some(on_switch) = switch.on_switch {
-                commands.run_system_with(on_switch, (entity, new_checked));
+            if let Some(on_change) = switch.on_change {
+                commands.run_system_with(on_change, (entity, new_checked));
             } else {
                 commands.trigger_targets(ValueChange(new_checked), entity);
             }

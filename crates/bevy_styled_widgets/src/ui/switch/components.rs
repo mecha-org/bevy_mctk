@@ -9,13 +9,14 @@ pub struct StyledSwitch {
     pub variant: SwitchVariant,
     pub state: bool,
     #[reflect(ignore)]
-    pub on_switch: Option<SystemId<In<(Entity, bool)>>>,
+    pub on_change: Option<SystemId<In<(Entity, bool)>>>,
     pub on_color: Option<Color>,
     pub off_color: Option<Color>,
     pub knob_color: Option<Color>,
     pub border_color: Option<Color>,
     pub hover_color: Option<Color>,
-    pub text_color: Option<Color>,
+    pub on_text_color: Option<Color>,
+    pub off_text_color: Option<Color>,
     pub on_label: Option<String>,
     pub off_label: Option<String>,
     #[reflect(ignore)]
@@ -33,7 +34,7 @@ impl StyledSwitch {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Component)]
 pub enum SwitchVariant {
     Rounded,             // Pill-shaped, soft rounded toggle
-    RectangularWithText, // Sharp corners, rectangular switch with text
+    Rectangular, // Sharp corners, rectangular switch with text
 }
 
 impl Default for SwitchVariant {

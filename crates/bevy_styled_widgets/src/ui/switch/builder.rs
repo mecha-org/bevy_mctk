@@ -2,7 +2,7 @@ use bevy::{
     ecs::system::SystemId, input_focus::tab_navigation::TabIndex, prelude::*,
     window::SystemCursorIcon, winit::cursor::CursorIcon,
 };
-use bevy_core_widgets::{Checked, hover::Hovering};
+use bevy_core_widgets::{Checked, hover::Hovering, InteractionDisabled};
 
 use bevy_additional_core_widgets::CoreSwitch;
 
@@ -16,13 +16,16 @@ use crate::themes::ThemeManager;
 pub struct SwitchBuilder {
     pub variant: SwitchVariant,
     pub state: bool, // ON or OFF by default
-    pub on_switch: Option<SystemId<In<(Entity, bool)>>>,
+    pub on_change: Option<SystemId<In<(Entity, bool)>>>,
     pub on_color: Option<Color>,
+    pub disabled_on_color: Option<Color>,
+    pub disabled_off_color: Option<Color>,
     pub off_color: Option<Color>,
     pub knob_color: Option<Color>,
     pub border_color: Option<Color>,
     pub hover_color: Option<Color>,
-    pub text_color: Option<Color>,
+    pub on_text_color: Option<Color>,
+    pub off_text_color: Option<Color>,
     pub on_label: Option<String>,
     pub off_label: Option<String>,
     pub size: Option<SwitchSize>,
@@ -44,13 +47,23 @@ impl SwitchBuilder {
         self
     }
 
-    pub fn on_switch(mut self, system_id: SystemId<In<(Entity, bool)>>) -> Self {
-        self.on_switch = Some(system_id);
+    pub fn on_change(mut self, system_id: SystemId<In<(Entity, bool)>>) -> Self {
+        self.on_change = Some(system_id);
         self
     }
 
     pub fn on_color(mut self, color: Color) -> Self {
         self.on_color = Some(color);
+        self
+    }
+
+    pub fn disabled_on_color(mut self, color: Color) -> Self {
+        self.disabled_on_color = Some(color);
+        self
+    }
+
+    pub fn disabled_off_color(mut self, color: Color) -> Self {
+        self.disabled_off_color = Some(color);
         self
     }
 
@@ -74,8 +87,13 @@ impl SwitchBuilder {
         self
     }
 
-    pub fn text_color(mut self, color: Color) -> Self {
-        self.text_color = Some(color);
+    pub fn on_text_color(mut self, color: Color) -> Self {
+        self.on_text_color = Some(color);
+        self
+    }
+
+    pub fn off_text_color(mut self, color: Color) -> Self {
+        self.off_text_color = Some(color);
         self
     }
 
@@ -105,6 +123,7 @@ impl SwitchBuilder {
     }
 
     pub fn build(self) -> impl Bundle {
+
         let theme_manager = ThemeManager::default();
 
         let switch_size_styles = theme_manager.styles.switch_sizes.clone();
@@ -126,35 +145,34 @@ impl SwitchBuilder {
             SystemCursorIcon::Pointer
         };
 
+        let style = match self.variant {
+            SwitchVariant::Rounded => &theme_manager.styles.switches.rounded,
+            SwitchVariant::Rectangular => &theme_manager.styles.switches.rectangular,
+        };
+        
+        let track_color = if is_disabled {
+            if is_on {
+                self.disabled_on_color.unwrap_or(style.disabled_on_background)
+            } else {
+                self.disabled_off_color.unwrap_or(style.disabled_off_background)
+            }
+        } else {
+            if is_on {
+                self.on_color.unwrap_or(style.on_background)
+            } else {
+                self.off_color.unwrap_or(style.off_background)
+            }
+        };
+      
+        let knob_color = if is_disabled {
+            style.disabled_knob_color
+        } else {
+            self.knob_color
+                .unwrap_or(style.knob_color)
+        };
+
         let child_nodes = match self.variant {
             SwitchVariant::Rounded => {
-                let track_color = if is_disabled {
-                    theme_manager
-                        .styles
-                        .switches
-                        .rounded
-                        .off_background
-                        .with_alpha(10.0)
-                } else if is_on {
-                    self.on_color
-                        .unwrap_or(theme_manager.styles.switches.rounded.on_background)
-                } else {
-                    self.off_color
-                        .unwrap_or(theme_manager.styles.switches.rounded.off_background)
-                };
-
-                let knob_color = if is_disabled {
-                    theme_manager
-                        .styles
-                        .switches
-                        .rounded
-                        .knob_color
-                        .with_alpha(10.0)
-                } else {
-                    self.knob_color
-                        .unwrap_or(theme_manager.styles.switches.rounded.knob_color)
-                };
-
                 Children::spawn((Spawn((
                     Node {
                         width: Val::Px(switch_size_style.track_width),
@@ -193,58 +211,19 @@ impl SwitchBuilder {
                                 font_size: switch_size_style.label_font_size,
                                 ..default()
                             },
-                            TextColor(
-                                self.text_color
-                                    .unwrap_or(theme_manager.styles.switches.rounded.text_color),
+                            TextColor(                                
+                                    if is_on {
+                                        self.on_text_color.unwrap_or(style.on_text_color)
+                                    } else {
+                                        self.off_text_color.unwrap_or(style.off_text_color)
+                                    }
                             ),
                         )),
                     )),
                 )),))
             }
 
-            SwitchVariant::RectangularWithText => {
-                let track_color = if is_disabled {
-                    theme_manager
-                        .styles
-                        .switches
-                        .rectangular_with_text
-                        .off_background
-                        .with_alpha(0.2)
-                } else if is_on {
-                    self.on_color.unwrap_or(
-                        theme_manager
-                            .styles
-                            .switches
-                            .rectangular_with_text
-                            .on_background,
-                    )
-                } else {
-                    self.off_color.unwrap_or(
-                        theme_manager
-                            .styles
-                            .switches
-                            .rectangular_with_text
-                            .off_background,
-                    )
-                };
-
-                let knob_color = if is_disabled {
-                    theme_manager
-                        .styles
-                        .switches
-                        .rectangular_with_text
-                        .knob_color
-                        .with_alpha(10.0)
-                } else {
-                    self.knob_color.unwrap_or(
-                        theme_manager
-                            .styles
-                            .switches
-                            .rectangular_with_text
-                            .knob_color,
-                    )
-                };
-
+            SwitchVariant::Rectangular => {
                 let text = if is_on {
                     self.on_label.clone().unwrap_or("ON".into())
                 } else {
@@ -297,13 +276,11 @@ impl SwitchBuilder {
                                 ..default()
                             },
                             TextColor(
-                                self.text_color.unwrap_or(
-                                    theme_manager
-                                        .styles
-                                        .switches
-                                        .rectangular_with_text
-                                        .text_color,
-                                ),
+                                if is_on {
+                                    self.on_text_color.unwrap_or(style.on_text_color)
+                                } else {
+                                    self.off_text_color.unwrap_or(style.off_text_color)
+                                }
                             ),
                         )),
                     )),
@@ -326,12 +303,13 @@ impl SwitchBuilder {
             StyledSwitch {
                 variant: self.variant,
                 state: self.state,
-                on_switch: self.on_switch,
+                on_change: self.on_change,
                 on_color: self.on_color,
                 off_color: self.off_color,
                 border_color: self.border_color,
                 hover_color: self.hover_color,
-                text_color: self.text_color,
+                on_text_color: self.on_text_color,
+                off_text_color: self.off_text_color,
                 on_label: self.on_label.clone(),
                 off_label: self.off_label.clone(),
                 size: self.size,
@@ -339,7 +317,7 @@ impl SwitchBuilder {
                 knob_color: self.knob_color,
             },
             CoreSwitch {
-                on_switch: self.on_switch,
+                on_change: self.on_change,
             },
             Checked(self.state),
             RootComponent,
