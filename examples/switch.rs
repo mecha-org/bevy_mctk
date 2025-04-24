@@ -1,5 +1,5 @@
 use bevy::{input_focus::tab_navigation::TabGroup, prelude::*, winit::WinitSettings};
-use bevy_core_widgets::Checked;
+use bevy_core_widgets::{Checked, InteractionDisabled};
 use bevy_styled_widgets::prelude::*;
 
 fn main() {
@@ -57,16 +57,23 @@ fn update_theme_toggle_button(
 fn update_light_dark_theme(
     In((entity, checked)): In<(Entity, bool)>,
     mut commands: Commands,
+    query: Query<&StyledSwitch>,
     mut theme_manager: ResMut<ThemeManager>,
 ) {
-    let current_mode = theme_manager.current_mode;
-    info!("Toggle ONE: Entity {:?}, state: {}", entity, checked);
-    let new_mode = match current_mode {
-        ThemeMode::Light => ThemeMode::Dark,
-        ThemeMode::Dark => ThemeMode::Light,
-    };
-    theme_manager.set_theme_mode(new_mode);
-    commands.entity(entity).insert(Checked(checked));
+    if let Ok(styled_switch) = query.get(entity) {
+        if styled_switch.disabled {
+            commands.entity(entity).insert(InteractionDisabled);
+            return;
+        } else {
+            let current_mode = theme_manager.current_mode;
+            let new_mode = match current_mode {
+                ThemeMode::Light => ThemeMode::Dark,
+                ThemeMode::Dark => ThemeMode::Light,
+            };
+            theme_manager.set_theme_mode(new_mode);
+            commands.entity(entity).insert(Checked(checked));
+        }
+   }   
 }
 
 fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
@@ -190,7 +197,7 @@ fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
                         StyledSwitch::builder()
                             .variant(SwitchVariant::Rounded)
                             .state(true)
-                            .on_switch(on_toogle_theme_mode)
+                            .on_change(on_toogle_theme_mode)
                             .build(),
                     ),
                 )),
@@ -222,7 +229,7 @@ fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
                     ),
                     Spawn(
                         StyledSwitch::builder()
-                            .variant(SwitchVariant::RectangularWithText)
+                            .variant(SwitchVariant::Rectangular)
                             .build(),
                     ),
                 )),
