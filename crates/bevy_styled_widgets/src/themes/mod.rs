@@ -15,3 +15,4 @@ mod manager;
 pub use manager::*;
 
 pub mod switch;
+pub mod toggle;

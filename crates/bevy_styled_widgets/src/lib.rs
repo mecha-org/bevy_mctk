@@ -31,4 +31,5 @@ pub mod prelude {
     pub use crate::ui::button::*;
     pub use crate::ui::switch::*;
     pub use crate::ui::text::*;
+    pub use crate::ui::toggle::*;
 }
