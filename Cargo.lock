@@ -315,6 +315,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_additional_core_widgets"
+version = "0.1.0"
+dependencies = [
+ "accesskit",
+ "bevy",
+ "bevy_core_widgets",
+]
+
+[[package]]
 name = "bevy_animation"
 version = "0.16.0-rc.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -825,6 +834,7 @@ version = "0.1.0"
 dependencies = [
  "accesskit",
  "bevy",
+ "bevy_additional_core_widgets",
  "bevy_core_widgets",
  "bevy_styled_widgets",
 ]
@@ -1134,6 +1144,7 @@ version = "0.1.0"
 dependencies = [
  "accesskit",
  "bevy",
+ "bevy_additional_core_widgets",
  "bevy_core_widgets",
 ]
 
