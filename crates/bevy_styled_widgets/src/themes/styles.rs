@@ -1,8 +1,7 @@
-use bevy::prelude::*;
-
 use super::{
     ThemeColors,
     button::{ButtonSizeStyles, ButtonVariantStyles, button_sizes},
+    input::InputStyle,
     panel::PanelStyle,
     switch::{SwitchSizeStyles, SwitchVariantStyles, switch_sizes},
     text::TextStyle,
@@ -16,6 +15,7 @@ pub struct ThemeStyles {
     pub panel: PanelStyle,
     pub switches: SwitchVariantStyles,
     pub switch_sizes: SwitchSizeStyles,
+    pub input: InputStyle,
 }
 
 impl ThemeStyles {
@@ -27,6 +27,7 @@ impl ThemeStyles {
             panel: PanelStyle::from_colors(colors.clone()),
             switches: SwitchVariantStyles::from_colors(colors.clone()),
             switch_sizes: switch_sizes(),
+            input: InputStyle::from_colors(colors.clone()),
         }
     }
 }

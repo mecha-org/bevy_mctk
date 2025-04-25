@@ -2,6 +2,7 @@ pub mod blue;
 pub mod button;
 pub mod default;
 pub mod green;
+pub mod input;
 pub mod orange;
 pub mod panel;
 pub mod red;
