@@ -1,5 +1,5 @@
 pub mod button;
-pub mod default;
+pub mod fonts;
 pub mod panel;
 pub mod styles;
 pub mod text;

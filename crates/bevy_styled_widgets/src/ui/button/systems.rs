@@ -1,48 +1,21 @@
-use bevy::{prelude::*, state::commands, text::LineHeight};
+use bevy::prelude::*;
 use bevy_core_widgets::{ButtonPressed, InteractionDisabled, hover::Hovering};
 
-use crate::themes::ThemeManager;
+use crate::themes::{ThemeManager, fonts::FontAssets};
 
 use super::{
     ButtonSize,
     components::{ButtonVariant, StyledButton, StyledButtonText},
 };
 
-// Update text color
-pub fn update_text_color(
-    theme_manager: Res<ThemeManager>,
-    mut query: Query<(&mut TextColor, &mut TextFont, &StyledButtonText)>,
-) {
-    for (mut text_color, mut text_font, button) in query.iter_mut() {
-        let button_styles = theme_manager.styles.buttons.clone();
-        let button_size_styles = theme_manager.styles.button_sizes.clone();
-        let button_style = match button.variant {
-            ButtonVariant::Primary => button_styles.primary,
-            ButtonVariant::Secondary => button_styles.secondary,
-            ButtonVariant::Destructive => button_styles.destructive,
-            ButtonVariant::Outline => button_styles.outline,
-            ButtonVariant::Ghost => button_styles.ghost,
-        };
-        let color = button_style.text_color;
-        text_color.0 = color;
-
-        //update font size
-        let button_size_style = match button.size.unwrap_or_default() {
-            ButtonSize::XSmall => button_size_styles.xsmall,
-            ButtonSize::Small => button_size_styles.small,
-            ButtonSize::Medium => button_size_styles.medium,
-            ButtonSize::Large => button_size_styles.large,
-            ButtonSize::XLarge => button_size_styles.xlarge,
-        };
-        text_font.font_size = button_size_style.font_size;
-    }
-}
-
 // Update the button's background color.
 #[allow(clippy::type_complexity)]
-pub fn update_button_bg_colors(
+pub fn update_button(
     theme_manager: Res<ThemeManager>,
+    children: Query<&mut Children>,
+    mut text_query: Query<(&mut Text, &mut TextColor, &mut TextFont), With<StyledButtonText>>,
     mut query: Query<(
+        Entity,
         &mut Node,
         &StyledButton,
         &mut BackgroundColor,
@@ -54,6 +27,7 @@ pub fn update_button_bg_colors(
     )>,
 ) {
     for (
+        button_entity_id,
         mut button_node,
         button,
         mut bg_color,
@@ -67,6 +41,46 @@ pub fn update_button_bg_colors(
         // Get styles from theme manager
         let button_styles = theme_manager.styles.buttons.clone();
         let button_size_styles = theme_manager.styles.button_sizes.clone();
+        let theme_icons = theme_manager.styles.icons.clone();
+
+        // Update text
+        //Get button text
+        if let Ok(children) = children.get(button_entity_id) {
+            for child in children.iter() {
+                if let Ok((mut text, mut text_color, mut text_font)) = text_query.get_mut(child) {
+                    let button_styles = theme_manager.styles.buttons.clone();
+                    let button_size_styles = theme_manager.styles.button_sizes.clone();
+                    let button_style = match button.variant {
+                        ButtonVariant::Primary => button_styles.primary,
+                        ButtonVariant::Secondary => button_styles.secondary,
+                        ButtonVariant::Destructive => button_styles.destructive,
+                        ButtonVariant::Outline => button_styles.outline,
+                        ButtonVariant::Ghost => button_styles.ghost,
+                    };
+                    let color = button_style.text_color;
+                    text_color.0 = color;
+
+                    //update font size
+                    let button_size_style = match button.size.unwrap_or_default() {
+                        ButtonSize::XSmall => button_size_styles.xsmall,
+                        ButtonSize::Small => button_size_styles.small,
+                        ButtonSize::Medium => button_size_styles.medium,
+                        ButtonSize::Large => button_size_styles.large,
+                        ButtonSize::XLarge => button_size_styles.xlarge,
+                    };
+                    text_font.font_size = button_size_style.font_size;
+
+                    //update icon
+                    if let Some(icon) = button.icon.clone() {
+                        if let Some(theme_icon) = theme_icons.get(&icon) {
+                            text.0 = theme_icon.clone();
+                        } else {
+                            text.0 = icon;
+                        };
+                    }
+                }
+            }
+        };
 
         // Update the background color based on the button's state
         let button_style = match button.variant {
@@ -118,39 +132,25 @@ pub fn update_button_bg_colors(
 
 pub fn init(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
     mut query: Query<(Entity, &StyledButton)>,
+    font_assets: Res<FontAssets>,
 ) {
     for (entity, button) in query.iter_mut() {
         let mut command = commands.entity(entity);
 
-        // if icon is present, add it as a child
-        if let Some(icon) = button.icon.clone() {
-            command.with_children(|parent| {
-                parent.spawn((
-                    ImageNode::new(asset_server.load(&icon)),
-                    Node {
-                        width: Val::Px(30.0),
-                        height: Val::Px(30.0),
-                        ..default()
-                    },
-                ));
-            });
-        }
+        let StyledButton { text, icon, .. } = button;
 
-        // if text button, add text as children
-        if let Some(text) = button.text.clone() {
+        let text_or_icon = text.clone().or_else(|| icon.clone());
+        if let Some(text_or_icon) = text_or_icon {
             command.with_children(|parent| {
                 parent.spawn((
-                    Text::new(text.clone()),
+                    Text::new(text_or_icon.clone()),
                     TextFont {
+                        font: font_assets.font_icons.clone(),
                         font_size: 14.0,
                         ..default()
                     },
-                    StyledButtonText {
-                        variant: button.variant,
-                        size: button.size,
-                    },
+                    StyledButtonText,
                 ));
             });
         }

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use serde::{Deserialize, Deserializer, Serialize};
 use std::{collections::HashMap, fs::File};
 
-use super::{default::light, styles::ThemeStyles};
+use super::styles::ThemeStyles;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ThemeId(pub String);
@@ -65,38 +65,6 @@ pub struct ThemeColors {
     pub sidebar_ring: Color,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum Theme {
-    Default,
-    Red,
-    Rose,
-    Orange,
-    Green,
-    Blue,
-    Yellow,
-    Violet,
-}
-
-impl Into<String> for Theme {
-    fn into(self) -> String {
-        match self {
-            Theme::Default => "default".into(),
-            Theme::Red => "red".to_string(),
-            Theme::Rose => "rose".to_string(),
-            Theme::Orange => "orange".to_string(),
-            Theme::Green => "green".to_string(),
-            Theme::Blue => "blue".to_string(),
-            Theme::Yellow => "yellow".to_string(),
-            Theme::Violet => "violet".to_string(),
-        }
-    }
-}
-impl Into<ThemeId> for Theme {
-    fn into(self) -> ThemeId {
-        ThemeId(self.into())
-    }
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum ThemeMode {
@@ -117,8 +85,8 @@ pub struct ThemeConfig {
     name: String,
     modes: Vec<ThemeMode>,
     default_mode: ThemeMode,
-    light: Option<ThemeColors>,
-    dark: Option<ThemeColors>,
+    light: Option<ThemeModeConfigs>,
+    dark: Option<ThemeModeConfigs>,
 }
 
 impl<'de> Deserialize<'de> for ThemeConfig {
@@ -131,8 +99,8 @@ impl<'de> Deserialize<'de> for ThemeConfig {
             name: String,
             modes: Vec<ThemeMode>,
             default_mode: ThemeMode,
-            light: Option<ThemeColors>,
-            dark: Option<ThemeColors>,
+            light: Option<ThemeModeConfigs>,
+            dark: Option<ThemeModeConfigs>,
         }
 
         let raw = RawThemeConfig::deserialize(deserializer)?;
@@ -191,9 +159,15 @@ where
     }
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ThemeModeConfigs {
+    pub colors: ThemeColors,
+    pub icons: HashMap<String, String>,
+}
+
 #[derive(Resource)]
 pub struct ThemeManager {
-    pub themes: HashMap<(ThemeId, ThemeMode), ThemeColors>,
+    pub themes: HashMap<(ThemeId, ThemeMode), ThemeModeConfigs>,
     pub current_theme: ThemeId,
     pub current_mode: ThemeMode,
     pub styles: ThemeStyles,
@@ -201,7 +175,7 @@ pub struct ThemeManager {
 
 impl Default for ThemeManager {
     fn default() -> Self {
-        let mut themes: HashMap<(ThemeId, ThemeMode), ThemeColors> = HashMap::new();
+        let mut themes: HashMap<(ThemeId, ThemeMode), ThemeModeConfigs> = HashMap::new();
         let current_theme = ThemeId("default".to_string());
         let mut current_mode = ThemeMode::Light;
         let mut theme_styles: Option<ThemeStyles> = None;
@@ -211,10 +185,10 @@ impl Default for ThemeManager {
         for theme in theme_configs {
             let ThemeConfig {
                 name,
-                modes,
                 default_mode,
                 light,
                 dark,
+                ..
             } = theme;
             let theme_id = ThemeId(name.clone());
 
@@ -294,8 +268,8 @@ impl ThemeManager {
         }
     }
 
-    pub fn add_theme(&mut self, theme: ThemeId, mode: ThemeMode, colors: ThemeColors) {
-        self.themes.insert((theme, mode), colors);
+    pub fn add_theme(&mut self, theme: ThemeId, mode: ThemeMode, configs: ThemeModeConfigs) {
+        self.themes.insert((theme, mode), configs);
     }
 
     pub fn remove_theme(&mut self, theme: ThemeId, mode: ThemeMode) -> Result<(), String> {
@@ -309,16 +283,16 @@ impl ThemeManager {
         &mut self,
         theme: ThemeId,
         mode: ThemeMode,
-        colors: ThemeColors,
+        configs: ThemeModeConfigs,
     ) -> Result<(), String> {
         if !self.themes.contains_key(&(theme.clone(), mode.clone())) {
             return Err(format!("Theme {:?} with mode {:?} not found", theme, mode));
         }
-        self.themes.insert((theme, mode), colors);
+        self.themes.insert((theme, mode), configs);
         Ok(())
     }
 
-    pub fn get_theme(&self, theme: ThemeId, mode: ThemeMode) -> Option<&ThemeColors> {
+    pub fn get_theme(&self, theme: ThemeId, mode: ThemeMode) -> Option<&ThemeModeConfigs> {
         self.themes.get(&(theme, mode))
     }
 
@@ -370,7 +344,7 @@ impl ThemeManager {
         let config: ThemeConfig = match serde_yaml::from_reader(file) {
             Ok(config) => config,
             Err(e) => {
-                error!("Failed to parse theme file: {}", e);
+                error!("Failed to parse theme file {} with error: {}", path, e);
                 return Err("Failed to parse theme file".into());
             }
         };

@@ -27,10 +27,7 @@ impl StyledButton {
     }
 }
 #[derive(Component)]
-pub struct StyledButtonText {
-    pub variant: ButtonVariant,
-    pub size: Option<ButtonSize>,
-}
+pub struct StyledButtonText;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Component)]
 pub enum ButtonVariant {
