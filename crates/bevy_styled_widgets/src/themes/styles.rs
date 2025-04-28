@@ -6,6 +6,7 @@ use super::{
     ThemeModeConfigs,
     button::{ButtonSizeStyles, ButtonVariantStyles, button_sizes},
     panel::PanelStyle,
+    switch::{SwitchSizeStyles, SwitchVariantStyles, switch_sizes},
     text::TextStyle,
 };
 
@@ -16,6 +17,8 @@ pub struct ThemeStyles {
     pub text: TextStyle,
     pub panel: PanelStyle,
     pub icons: HashMap<String, String>,
+    pub switches: SwitchVariantStyles,
+    pub switch_sizes: SwitchSizeStyles,
 }
 
 impl ThemeStyles {
@@ -25,6 +28,8 @@ impl ThemeStyles {
             button_sizes: button_sizes(),
             text: TextStyle::from_colors(configs.colors.clone()),
             panel: PanelStyle::from_colors(configs.colors.clone()),
+            switches: SwitchVariantStyles::from_colors(configs.colors.clone()),
+            switch_sizes: switch_sizes(),
             icons: configs.icons.clone(),
         }
     }

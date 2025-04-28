@@ -6,3 +6,5 @@ pub mod text;
 
 mod manager;
 pub use manager::*;
+
+pub mod switch;
