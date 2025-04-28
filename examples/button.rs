@@ -157,7 +157,7 @@ fn setup_view_root(mut commands: Commands) {
                 },
                 Children::spawn((Spawn((
                     StyledButton::builder()
-                        .icon("theme-mode-toggle")
+                        .icon("theme_mode_toggle")
                         .on_click(on_toogle_theme_mode)
                         .variant(ButtonVariant::Secondary)
                         .build(),
