@@ -52,24 +52,30 @@ pub fn update_input_colors(
 }
 
 pub fn on_input_change(
-    // mut trigger: Trigger<ValueChange<String>>,
+    mut trigger: Trigger<CosmicTextChanged>,
     mut events: EventReader<CosmicTextChanged>,
-    mut commands: Commands,
     query: Query<&StyledInput>,
+    mut commands: Commands,
 ) {
-    // trigger.propagate(false);
     for event in events.read() {
         let CosmicTextChanged((entity, text_value)) = event;
         info!("Entity {:?} changed text: {:?}", entity.clone(), text_value);
+    }
+    // Prevent further propagation of this event
+    trigger.propagate(false);
 
-        if let Ok(styled_input) = query.get(*entity) {
-            if styled_input.disabled {
-                commands.entity(*entity).insert(InteractionDisabled);
-            }
-            if let Some(system_id) = styled_input.on_change {
-                // Defer the callback system using commands
-                commands.run_system_with(system_id, (*entity, text_value.clone()));
-            }
+    // Extract event data and target entity from the trigger
+    let (entity, text_value) = &trigger.event().0;
+
+    info!("Entity {:?} changed text: {:?}", entity, text_value);
+
+    if let Ok(styled_input) = query.get(*entity) {
+        if styled_input.disabled {
+            commands.entity(*entity).insert(InteractionDisabled);
+        }
+        if let Some(system_id) = styled_input.on_change {
+            // Defer the callback system using commands
+            commands.run_system_with(system_id, (*entity, text_value.clone()));
         }
     }
 }

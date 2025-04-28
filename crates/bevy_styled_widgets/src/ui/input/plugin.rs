@@ -8,6 +8,6 @@ impl Plugin for StyledInputPlugin {
         app.add_systems(PostStartup, init);
         app.add_systems(Update, (update_button_bg_colors, update_text_color));
         app.add_systems(Update, update_input_colors);
-        app.add_systems(Update, on_input_change);
+        app.add_observer(on_input_change);
     }
 }
