@@ -31,7 +31,7 @@ light:
     sidebar_border: [0.92, 0.004, 286.32]
     sidebar_ring: [0.795, 0.184, 86.047]
   icons:
-    "theme_mode_toggle": "\ue900"
+    theme_mode_toggle: "\ue900"
 dark:
   colors:
     background: [0.141, 0.005, 285.823]
@@ -62,4 +62,4 @@ dark:
     sidebar_border: [1.0, 0.0, 0.0, 0.1]
     sidebar_ring: [0.795, 0.184, 86.047]
   icons:
-    "theme_mode_toggle": "\ue901"
+    theme_mode_toggle: "\ue901"
