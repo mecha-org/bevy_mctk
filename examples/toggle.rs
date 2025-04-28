@@ -250,7 +250,7 @@ fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
                     ),
                     Spawn(
                         StyledText::builder()
-                            .content("Inactive With Outline")
+                            .content("Inactive")
                             .font_size(14.0)
                             .build(),
                     ),
