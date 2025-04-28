@@ -6,7 +6,7 @@ use bevy_core_widgets::{CoreButton, hover::Hovering};
 
 use super::{
     ButtonSize,
-    components::{AccessibleName, ButtonVariant, StyledButton, StyledButtonText},
+    components::{AccessibleName, ButtonVariant, StyledButton},
 };
 
 #[derive(Default)]
@@ -113,17 +113,6 @@ impl ButtonBuilder {
             },
             AccessibleName(self.text.clone().unwrap_or_else(|| "Button".to_string())),
             TabIndex(0),
-            // children![(
-            //     Text::new(self.text.clone().unwrap_or_else(|| "Button".to_string())),
-            //     TextFont {
-            //         font_size: 14.0,
-            //         ..default()
-            //     },
-            //     StyledButtonText {
-            //         variant: self.variant,
-            //         size: self.size,
-            //     }
-            // )],
         )
     }
 }
