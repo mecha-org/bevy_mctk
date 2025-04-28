@@ -52,11 +52,10 @@ fn update_theme_toggle_button(
     theme_manager: Res<ThemeManager>,
     mut query: Query<&mut StyledButton, With<ThemeToggleButton>>,
 ) {
-    println!("update_theme_toggle_button()");
     for mut button in query.iter_mut() {
         let icon = match theme_manager.current_mode {
-            ThemeMode::Light => "dark.png",
-            ThemeMode::Dark => "light.png",
+            ThemeMode::Light => "images/dark.png",
+            ThemeMode::Dark => "images/light.png",
         };
         button.icon = Some(icon.to_string());
     }
@@ -177,7 +176,7 @@ fn setup_view_root(mut commands: Commands) {
                 Children::spawn((
                     Spawn((
                         StyledButton::builder()
-                            .icon("dark.png")
+                            .icon("images/dark.png")
                             .on_click(on_toogle_theme_mode)
                             .variant(ButtonVariant::Secondary)
                             .build(),

@@ -17,3 +17,5 @@ bevy_core_widgets = { git = "https://github.com/viridia/bevy_core_widgets.git", 
 bevy_additional_core_widgets = { path = "../bevy_additional_core_widgets", version = "0.1.0", default-features = false }
 accesskit = "0.18.0"
 bevy = "0.16.0-dev"
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"
