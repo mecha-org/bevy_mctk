@@ -331,14 +331,14 @@ fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
                     column_gap: Val::Px(6.0),
                     ..default()
                 },
-                Children::spawn((Spawn(
+                Children::spawn((Spawn((
                     StyledSwitch::builder()
                         .variant(SwitchVariant::Rounded)
                         .state(true)
                         .disabled()
                         .build(),
                     InteractionDisabled,
-                ),)),
+                )),)),
             )),
         )),
     ));
