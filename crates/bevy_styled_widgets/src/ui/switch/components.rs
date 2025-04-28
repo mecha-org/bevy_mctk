@@ -33,7 +33,7 @@ impl StyledSwitch {
 /// Toggle switch variants styled like common UI systems
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Component)]
 pub enum SwitchVariant {
-    Rounded,             // Pill-shaped, soft rounded toggle
+    Rounded,     // Pill-shaped, soft rounded toggle
     Rectangular, // Sharp corners, rectangular switch with text
 }
 

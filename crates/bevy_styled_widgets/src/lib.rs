@@ -8,7 +8,10 @@ use bevy::{
 use bevy_additional_core_widgets::AdditionalCoreWidgetsPlugin;
 use bevy_core_widgets::CoreWidgetsPlugin;
 
-use ui::{button::StyledButtonPlugin, switch::StyledSwitchPlugin, text::StyledTextPlugin};
+use ui::{
+    button::StyledButtonPlugin, switch::StyledSwitchPlugin, text::StyledTextPlugin,
+    toggle::StyledTogglePlugin,
+};
 
 pub struct StyledWidgetsPligin;
 
@@ -21,6 +24,7 @@ impl Plugin for StyledWidgetsPligin {
             StyledTextPlugin,
             AdditionalCoreWidgetsPlugin,
             StyledSwitchPlugin,
+            StyledTogglePlugin,
         ));
     }
 }

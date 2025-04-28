@@ -2,43 +2,48 @@ use bevy::a11y::AccessibilityNode;
 use bevy::ecs::{component::HookContext, system::SystemId, world::DeferredWorld};
 use bevy::prelude::*;
 
-#[derive(Component)]
-pub struct StyledToggleButton {
+#[derive(Component, Reflect)]
+#[reflect(from_reflect = false)]
+pub struct StyledToggle {
     pub active: bool,
-    pub on_change: Option<fn(bool)>,
-    pub label: String,
+    #[reflect(ignore)]
+    pub on_change: Option<SystemId<In<(Entity, bool)>>>,
+    pub label: Option<String>,
+    #[reflect(ignore)]
     pub variant: ToggleVariant,
+    #[reflect(ignore)]
+    pub size: Option<ToggleSize>,
+    pub disabled: bool,
+    pub icon: Option<String>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+impl StyledToggle {
+    pub fn builder() -> super::builder::ToggleBuilder {
+        super::builder::ToggleBuilder::default()
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Component)]
 pub enum ToggleVariant {
-    Rounded,
-    RectangularWithText,
+    Default,
+    Outline,
+    WithText,
 }
 
 impl Default for ToggleVariant {
     fn default() -> Self {
-        ToggleVariant::RectangularWithText
+        ToggleVariant::Default
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct ButtonTheme {
-    pub active_background: Color,
-    pub inactive_background: Color,
-    pub active_text_color: Color,
-    pub inactive_text_color: Color,
-}
-
-impl Default for ButtonTheme {
-    fn default() -> Self {
-        Self {
-            active_background: Color::rgb(0.2, 0.7, 0.3),
-            inactive_background: Color::rgb(0.3, 0.3, 0.3),
-            active_text_color: Color::WHITE,
-            inactive_text_color: Color::GRAY,
-        }
-    }
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, Component)]
+pub enum ToggleSize {
+    XSmall,
+    Small,
+    #[default]
+    Medium,
+    Large,
+    XLarge,
 }
 
 #[derive(Component, Default)]
@@ -49,6 +54,6 @@ fn on_set_label(mut world: DeferredWorld, context: HookContext) {
     let mut entt = world.entity_mut(context.entity);
     let name = entt.get::<AccessibleName>().unwrap().0.clone();
     if let Some(mut accessibility) = entt.get_mut::<AccessibilityNode>() {
-        accessibility.set_label(&name);
+        accessibility.set_label(name.as_str());
     }
 }
