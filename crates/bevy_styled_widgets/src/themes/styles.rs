@@ -3,6 +3,7 @@ use super::{
     button::{ButtonSizeStyles, ButtonVariantStyles, button_sizes},
     input::InputStyle,
     panel::PanelStyle,
+    slider::SliderStyle,
     switch::{SwitchSizeStyles, SwitchVariantStyles, switch_sizes},
     text::TextStyle,
 };
@@ -16,6 +17,7 @@ pub struct ThemeStyles {
     pub switches: SwitchVariantStyles,
     pub switch_sizes: SwitchSizeStyles,
     pub input: InputStyle,
+    pub slider: SliderStyle,
 }
 
 impl ThemeStyles {
@@ -28,6 +30,7 @@ impl ThemeStyles {
             switches: SwitchVariantStyles::from_colors(colors.clone()),
             switch_sizes: switch_sizes(),
             input: InputStyle::from_colors(colors.clone()),
+            slider: SliderStyle::from_colors(colors.clone()),
         }
     }
 }

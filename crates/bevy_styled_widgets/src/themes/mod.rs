@@ -15,4 +15,5 @@ pub mod yellow;
 mod manager;
 pub use manager::*;
 
+pub mod slider;
 pub mod switch;

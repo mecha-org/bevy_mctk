@@ -9,8 +9,8 @@ use bevy_additional_core_widgets::AdditionalCoreWidgetsPlugin;
 use bevy_core_widgets::CoreWidgetsPlugin;
 
 use ui::{
-    button::StyledButtonPlugin, input::StyledInputPlugin, switch::StyledSwitchPlugin,
-    text::StyledTextPlugin,
+    button::StyledButtonPlugin, input::StyledInputPlugin, slider::StyledSliderPlugin,
+    switch::StyledSwitchPlugin, text::StyledTextPlugin,
 };
 
 pub struct StyledWidgetsPligin;
@@ -25,6 +25,7 @@ impl Plugin for StyledWidgetsPligin {
             AdditionalCoreWidgetsPlugin,
             StyledSwitchPlugin,
             StyledInputPlugin,
+            StyledSliderPlugin,
         ));
     }
 }
@@ -34,6 +35,7 @@ pub mod prelude {
     pub use crate::themes::*;
     pub use crate::ui::button::*;
     pub use crate::ui::input::*;
+    pub use crate::ui::slider::*;
     pub use crate::ui::switch::*;
     pub use crate::ui::text::*;
 }
