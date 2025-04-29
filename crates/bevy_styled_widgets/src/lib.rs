@@ -6,8 +6,10 @@ use bevy::{
     input_focus::InputDispatchPlugin,
 };
 use bevy_additional_core_widgets::AdditionalCoreWidgetsPlugin;
+use bevy_asset_loader::prelude::*;
 use bevy_core_widgets::CoreWidgetsPlugin;
 
+use themes::fonts::FontAssets;
 use ui::{
     button::StyledButtonPlugin, input::StyledInputPlugin, switch::StyledSwitchPlugin,
     text::StyledTextPlugin,
@@ -26,6 +28,7 @@ impl Plugin for StyledWidgetsPligin {
             StyledSwitchPlugin,
             StyledInputPlugin,
         ));
+        app.init_collection::<FontAssets>();
     }
 }
 

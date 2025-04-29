@@ -33,10 +33,9 @@ fn update_root_background(
     }
 }
 
-fn set_theme(theme: Theme) -> impl FnMut(ResMut<ThemeManager>) + Clone {
+fn set_theme(id: ThemeId) -> impl FnMut(ResMut<ThemeManager>) + Clone {
     move |mut theme_manager: ResMut<ThemeManager>| {
-        let id = ThemeId(theme.into());
-        theme_manager.set_theme(id);
+        theme_manager.set_theme(id.clone());
     }
 }
 
@@ -73,7 +72,7 @@ fn update_light_dark_theme(
             theme_manager.set_theme_mode(new_mode);
             commands.entity(entity).insert(Checked(checked));
         }
-   }   
+    }
 }
 
 fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
@@ -82,14 +81,14 @@ fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
     let on_toogle_theme_mode = commands.register_system(update_light_dark_theme);
 
     // Example theme change handlers (register your real handlers)
-    let on_default_theme = commands.register_system(set_theme(Theme::Default));
-    let on_red_theme = commands.register_system(set_theme(Theme::Red));
-    let on_rose_theme = commands.register_system(set_theme(Theme::Rose));
-    let on_orange_theme = commands.register_system(set_theme(Theme::Orange));
-    let on_green_theme = commands.register_system(set_theme(Theme::Green));
-    let on_blue_theme = commands.register_system(set_theme(Theme::Blue));
-    let on_yellow_theme = commands.register_system(set_theme(Theme::Yellow));
-    let on_violet_theme = commands.register_system(set_theme(Theme::Violet));
+    let on_default_theme = commands.register_system(set_theme(ThemeId("default".into())));
+    let on_red_theme = commands.register_system(set_theme(ThemeId("red".into())));
+    let on_rose_theme = commands.register_system(set_theme(ThemeId("rose".into())));
+    let on_orange_theme = commands.register_system(set_theme(ThemeId("orange".into())));
+    let on_green_theme = commands.register_system(set_theme(ThemeId("green".into())));
+    let on_blue_theme = commands.register_system(set_theme(ThemeId("blue".into())));
+    let on_yellow_theme = commands.register_system(set_theme(ThemeId("yellow".into())));
+    let on_violet_theme = commands.register_system(set_theme(ThemeId("violet".into())));
 
     commands.spawn((
         Node {
