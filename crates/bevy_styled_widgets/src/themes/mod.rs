@@ -14,5 +14,6 @@ pub mod yellow;
 mod manager;
 pub use manager::*;
 
+pub mod checkbox;
 pub mod switch;
 pub mod toggle;

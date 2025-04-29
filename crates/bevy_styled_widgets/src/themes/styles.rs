@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use super::{
     ThemeColors,
     button::{ButtonSizeStyles, ButtonVariantStyles, button_sizes},
+    checkbox::{CheckboxSizeStyles, CheckboxVariantStyles, checkbox_sizes},
     panel::PanelStyle,
     switch::{SwitchSizeStyles, SwitchVariantStyles, switch_sizes},
     text::TextStyle,
@@ -19,6 +20,8 @@ pub struct ThemeStyles {
     pub switch_sizes: SwitchSizeStyles,
     pub toggles: ToggleVariantStyles,
     pub toggle_sizes: ToggleSizeStyles,
+    pub checkboxes: CheckboxVariantStyles,
+    pub checkbox_sizes: CheckboxSizeStyles,
 }
 
 impl ThemeStyles {
@@ -32,6 +35,8 @@ impl ThemeStyles {
             switch_sizes: switch_sizes(),
             toggles: ToggleVariantStyles::from_colors(colors.clone()),
             toggle_sizes: toggle_sizes(),
+            checkboxes: CheckboxVariantStyles::from_colors(colors.clone()),
+            checkbox_sizes: checkbox_sizes(),
         }
     }
 }
