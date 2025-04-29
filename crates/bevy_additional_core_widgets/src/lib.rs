@@ -1,4 +1,4 @@
-use bevy::app::{App, Plugin, Update};
+use bevy::app::{App, Plugin};
 mod core_switch;
 
 pub use core_switch::{CoreSwitch, CoreSwitchPlugin};
