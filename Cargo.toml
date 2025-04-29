@@ -19,3 +19,4 @@ bevy_additional_core_widgets = { path = "crates/bevy_additional_core_widgets", v
 bevy = "0.16.0-dev"
 bevy_core_widgets = { git = "https://github.com/viridia/bevy_core_widgets.git",  rev = "c8ef2bb82ec9706d1faea22f29f7786645a22538" }
 accesskit = "0.18.0"
+bevy_asset_loader = { version = "0.23.0-rc.3", features = ["standard_dynamic_assets"]}

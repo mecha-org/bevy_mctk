@@ -1,3 +1,4 @@
+mod icon;
 mod themes;
 mod ui;
 
@@ -28,8 +29,10 @@ impl Plugin for StyledWidgetsPligin {
     }
 }
 
+#[allow(ambiguous_glob_reexports)]
 pub mod prelude {
     pub use crate::StyledWidgetsPligin;
+    pub use crate::icon::*;
     pub use crate::themes::*;
     pub use crate::ui::button::*;
     pub use crate::ui::switch::*;
