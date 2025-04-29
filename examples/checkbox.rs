@@ -192,8 +192,8 @@ fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
                     StyledCheckbox::builder()
                         .variant(CheckboxVariant::Default)
                         .on_change(on_toogle_theme_mode)
-                        .caption("Dark")
-                        .description("Enable dark mode")
+                        .caption("Light")
+                        .description("Enable light mode")
                         .build(),
                     ThemeToggleCheckbox,
                 )),)),
