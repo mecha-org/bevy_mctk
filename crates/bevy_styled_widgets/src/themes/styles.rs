@@ -37,9 +37,9 @@ impl ThemeStyles {
             switches: SwitchVariantStyles::from_colors(configs.colors.clone()),
             switch_sizes: switch_sizes(),
             icons: configs.icons.clone(),
-            toggles: ToggleVariantStyles::from_colors(colors.clone()),
+            toggles: ToggleVariantStyles::from_colors(configs.colors.clone()),
             toggle_sizes: toggle_sizes(),
-            checkboxes: CheckboxVariantStyles::from_colors(colors.clone()),
+            checkboxes: CheckboxVariantStyles::from_colors(configs.colors.clone()),
             checkbox_sizes: checkbox_sizes(),
         }
     }
