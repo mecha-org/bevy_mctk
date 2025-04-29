@@ -149,11 +149,16 @@ impl SwitchBuilder {
             SwitchVariant::Rectangular => &theme_manager.styles.switches.rectangular,
         };
 
+
         let track_color = if is_disabled {
             if is_on {
                 self.disabled_on_color
                     .unwrap_or(style.disabled_on_background)
+                self.disabled_on_color
+                    .unwrap_or(style.disabled_on_background)
             } else {
+                self.disabled_off_color
+                    .unwrap_or(style.disabled_off_background)
                 self.disabled_off_color
                     .unwrap_or(style.disabled_off_background)
             }
@@ -165,9 +170,11 @@ impl SwitchBuilder {
             }
         };
 
+
         let knob_color = if is_disabled {
             style.disabled_knob_color
         } else {
+            self.knob_color.unwrap_or(style.knob_color)
             self.knob_color.unwrap_or(style.knob_color)
         };
 
@@ -215,7 +222,52 @@ impl SwitchBuilder {
                         } else {
                             self.off_text_color.unwrap_or(style.off_text_color)
                         }),
+            SwitchVariant::Rounded => Children::spawn((Spawn((
+                Node {
+                    width: Val::Px(switch_size_style.track_width),
+                    height: Val::Px(switch_size_style.track_height),
+                    border: UiRect::all(Val::Px(switch_size_style.track_border_width)),
+                    justify_content: JustifyContent::Start,
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                BorderRadius::all(Val::Px(switch_size_style.track_corner_radius)),
+                BackgroundColor(track_color),
+                Children::spawn((
+                    Spawn((
+                        Node {
+                            position_type: PositionType::Absolute,
+                            width: Val::Px(switch_size_style.knob_width),
+                            height: Val::Px(switch_size_style.knob_height),
+                            left: Val::Px(if is_on {
+                                switch_size_style.knob_offset_x_on
+                            } else {
+                                switch_size_style.knob_offset_x
+                            }),
+                            ..default()
+                        },
+                        BackgroundColor(knob_color),
+                        BorderRadius::all(Val::Px(switch_size_style.knob_corner_radius)),
                     )),
+                    Spawn((
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(0.0),
+                            ..default()
+                        },
+                        Text::new(""),
+                        TextFont {
+                            font_size: switch_size_style.label_font_size,
+                            ..default()
+                        },
+                        TextColor(if is_on {
+                            self.on_text_color.unwrap_or(style.on_text_color)
+                        } else {
+                            self.off_text_color.unwrap_or(style.off_text_color)
+                        }),
+                    )),
+                )),
+            )),)),
                 )),
             )),)),
 
@@ -276,6 +328,11 @@ impl SwitchBuilder {
                             } else {
                                 self.off_text_color.unwrap_or(style.off_text_color)
                             }),
+                            TextColor(if is_on {
+                                self.on_text_color.unwrap_or(style.on_text_color)
+                            } else {
+                                self.off_text_color.unwrap_or(style.off_text_color)
+                            }),
                         )),
                     )),
                 )),))
@@ -321,3 +378,4 @@ impl SwitchBuilder {
         )
     }
 }
+

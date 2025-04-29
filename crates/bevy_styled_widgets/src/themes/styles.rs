@@ -1,7 +1,9 @@
+use std::collections::HashMap;
+
 use bevy::prelude::*;
 
 use super::{
-    ThemeColors,
+    ThemeModeConfigs,
     button::{ButtonSizeStyles, ButtonVariantStyles, button_sizes},
     checkbox::{CheckboxSizeStyles, CheckboxVariantStyles, checkbox_sizes},
     panel::PanelStyle,
@@ -16,6 +18,7 @@ pub struct ThemeStyles {
     pub button_sizes: ButtonSizeStyles,
     pub text: TextStyle,
     pub panel: PanelStyle,
+    pub icons: HashMap<String, String>,
     pub switches: SwitchVariantStyles,
     pub switch_sizes: SwitchSizeStyles,
     pub toggles: ToggleVariantStyles,
@@ -25,14 +28,15 @@ pub struct ThemeStyles {
 }
 
 impl ThemeStyles {
-    pub fn from_colors(colors: ThemeColors) -> Self {
+    pub fn from_colors(configs: ThemeModeConfigs) -> Self {
         Self {
-            buttons: ButtonVariantStyles::from_colors(colors.clone()),
+            buttons: ButtonVariantStyles::from_colors(configs.colors.clone()),
             button_sizes: button_sizes(),
-            text: TextStyle::from_colors(colors.clone()),
-            panel: PanelStyle::from_colors(colors.clone()),
-            switches: SwitchVariantStyles::from_colors(colors.clone()),
+            text: TextStyle::from_colors(configs.colors.clone()),
+            panel: PanelStyle::from_colors(configs.colors.clone()),
+            switches: SwitchVariantStyles::from_colors(configs.colors.clone()),
             switch_sizes: switch_sizes(),
+            icons: configs.icons.clone(),
             toggles: ToggleVariantStyles::from_colors(colors.clone()),
             toggle_sizes: toggle_sizes(),
             checkboxes: CheckboxVariantStyles::from_colors(colors.clone()),
