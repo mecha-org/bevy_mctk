@@ -8,10 +8,6 @@ fn main() {
         .insert_resource(WinitSettings::desktop_app())
         .add_systems(Startup, setup_view_root)
         .add_systems(Update, update_root_background)
-        .add_systems(
-            Update,
-            update_theme_toggle_button.run_if(resource_exists_and_changed::<ThemeManager>),
-        )
         .run();
 }
 
@@ -41,24 +37,9 @@ fn toggle_mode(mut theme_manager: ResMut<ThemeManager>) {
     theme_manager.set_theme_mode(new_mode);
 }
 
-fn set_theme(theme: Theme) -> impl FnMut(ResMut<ThemeManager>) + Clone {
+fn set_theme(id: ThemeId) -> impl FnMut(ResMut<ThemeManager>) + Clone {
     move |mut theme_manager: ResMut<ThemeManager>| {
-        let id = ThemeId(theme.into());
-        theme_manager.set_theme(id);
-    }
-}
-
-fn update_theme_toggle_button(
-    theme_manager: Res<ThemeManager>,
-    mut query: Query<&mut StyledButton, With<ThemeToggleButton>>,
-) {
-    println!("update_theme_toggle_button()");
-    for mut button in query.iter_mut() {
-        let icon = match theme_manager.current_mode {
-            ThemeMode::Light => "dark.png",
-            ThemeMode::Dark => "light.png",
-        };
-        button.icon = Some(icon.to_string());
+        theme_manager.set_theme(id.clone());
     }
 }
 
@@ -68,14 +49,14 @@ fn setup_view_root(mut commands: Commands) {
     let on_toogle_theme_mode = commands.register_system(toggle_mode);
 
     // Example theme change handlers (register your real handlers)
-    let on_default_theme = commands.register_system(set_theme(Theme::Default));
-    let on_red_theme = commands.register_system(set_theme(Theme::Red));
-    let on_rose_theme = commands.register_system(set_theme(Theme::Rose));
-    let on_orange_theme = commands.register_system(set_theme(Theme::Orange));
-    let on_green_theme = commands.register_system(set_theme(Theme::Green));
-    let on_blue_theme = commands.register_system(set_theme(Theme::Blue));
-    let on_yellow_theme = commands.register_system(set_theme(Theme::Yellow));
-    let on_violet_theme = commands.register_system(set_theme(Theme::Violet));
+    let on_default_theme = commands.register_system(set_theme(ThemeId("default".into())));
+    let on_red_theme = commands.register_system(set_theme(ThemeId("red".into())));
+    let on_rose_theme = commands.register_system(set_theme(ThemeId("rose".into())));
+    let on_orange_theme = commands.register_system(set_theme(ThemeId("orange".into())));
+    let on_green_theme = commands.register_system(set_theme(ThemeId("green".into())));
+    let on_blue_theme = commands.register_system(set_theme(ThemeId("blue".into())));
+    let on_yellow_theme = commands.register_system(set_theme(ThemeId("yellow".into())));
+    let on_violet_theme = commands.register_system(set_theme(ThemeId("violet".into())));
 
     commands.spawn((
         Node {
@@ -174,23 +155,14 @@ fn setup_view_root(mut commands: Commands) {
                     padding: UiRect::axes(Val::Px(12.0), Val::Px(0.0)),
                     ..default()
                 },
-                Children::spawn((
-                    Spawn((
-                        StyledButton::builder()
-                            .icon("dark.png")
-                            .on_click(on_toogle_theme_mode)
-                            .variant(ButtonVariant::Secondary)
-                            .build(),
-                        ThemeToggleButton,
-                    )),
-                    // Spawn(
-                    //     StyledButton::builder()
-                    //         .icon("dark.png")
-                    //         .on_click(on_dark_click)
-                    //         .variant(ButtonVariant::Secondary)
-                    //         .build(),
-                    // ),
-                )),
+                Children::spawn((Spawn((
+                    StyledButton::builder()
+                        .icon("theme_mode_toggle")
+                        .on_click(on_toogle_theme_mode)
+                        .variant(ButtonVariant::Secondary)
+                        .build(),
+                    ThemeToggleButton,
+                )),)),
             )),
             // Buttons section
             Spawn(
