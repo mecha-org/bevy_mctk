@@ -10,7 +10,10 @@ use bevy_asset_loader::prelude::*;
 use bevy_core_widgets::CoreWidgetsPlugin;
 
 use themes::fonts::FontAssets;
-use ui::{button::StyledButtonPlugin, switch::StyledSwitchPlugin, text::StyledTextPlugin};
+use ui::{
+    button::StyledButtonPlugin, progress::StyledProgessPlugin, switch::StyledSwitchPlugin,
+    text::StyledTextPlugin,
+};
 
 pub struct StyledWidgetsPligin;
 
@@ -21,6 +24,7 @@ impl Plugin for StyledWidgetsPligin {
             InputDispatchPlugin,
             StyledButtonPlugin,
             StyledTextPlugin,
+            StyledProgessPlugin,
             AdditionalCoreWidgetsPlugin,
             StyledSwitchPlugin,
         ));
@@ -32,6 +36,7 @@ pub mod prelude {
     pub use crate::StyledWidgetsPligin;
     pub use crate::themes::*;
     pub use crate::ui::button::*;
+    pub use crate::ui::progress::*;
     pub use crate::ui::switch::*;
     pub use crate::ui::text::*;
 }
