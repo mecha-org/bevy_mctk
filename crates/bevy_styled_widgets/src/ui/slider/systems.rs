@@ -86,20 +86,35 @@ pub fn update_slider_thumb(
     }
 }
 
+#[allow(clippy::type_complexity)]
 pub fn change_slider_colors(
     theme_manager: Res<ThemeManager>,
-    mut param_set: ParamSet<(
-        Query<&mut BackgroundColor, With<Track>>,
-        Query<&mut BackgroundColor, With<Thumb>>,
-    )>,
+    children: Query<&mut Children>,
+    mut query: Query<(Entity, &StyledSlider)>,
+    mut q_track: Query<&mut BackgroundColor, (With<Track>, Without<Thumb>)>,
+    mut q_thumb: Query<&mut BackgroundColor, (With<Thumb>, Without<Track>)>,
 ) {
-    let slider_styles = theme_manager.styles.slider.clone();
+    for (progress_entity_id, slider) in query.iter_mut() {
+        let progress_style = &theme_manager.styles.slider;
 
-    for mut background_color in param_set.p0().iter_mut() {
-        background_color.0 = slider_styles.track_color;
-    }
+        if let Ok(children) = children.get(progress_entity_id) {
+            for child in children.iter() {
+                if let Ok(mut bg) = q_track.get_mut(child) {
+                    bg.0 = if slider.track_color.is_none() {
+                        progress_style.track_color
+                    } else {
+                        slider.track_color.unwrap()
+                    };
+                }
 
-    for mut background_color in param_set.p1().iter_mut() {
-        background_color.0 = slider_styles.thumb_color;
+                if let Ok(mut bg) = q_thumb.get_mut(child) {
+                    bg.0 = if slider.thumb_color.is_none() {
+                        progress_style.thumb_color
+                    } else {
+                        slider.thumb_color.unwrap()
+                    };
+                }
+            }
+        }
     }
 }
