@@ -6,6 +6,7 @@ use super::{
     ThemeModeConfigs,
     button::{ButtonSizeStyles, ButtonVariantStyles, button_sizes},
     panel::PanelStyle,
+    radio::{RadioButtonSizeStyles, RadioButtonVariantStyles, radio_button_sizes},
     switch::{SwitchSizeStyles, SwitchVariantStyles, switch_sizes},
     text::TextStyle,
 };
@@ -19,6 +20,8 @@ pub struct ThemeStyles {
     pub icons: HashMap<String, String>,
     pub switches: SwitchVariantStyles,
     pub switch_sizes: SwitchSizeStyles,
+    pub radio_buttons: RadioButtonVariantStyles,
+    pub radio_button_sizes: RadioButtonSizeStyles,
 }
 
 impl ThemeStyles {
@@ -31,6 +34,8 @@ impl ThemeStyles {
             switches: SwitchVariantStyles::from_colors(configs.colors.clone()),
             switch_sizes: switch_sizes(),
             icons: configs.icons.clone(),
+            radio_buttons: RadioButtonVariantStyles::from_colors(configs.colors.clone()),
+            radio_button_sizes: radio_button_sizes(),
         }
     }
 }

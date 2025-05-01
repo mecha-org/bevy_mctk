@@ -7,4 +7,5 @@ pub mod text;
 mod manager;
 pub use manager::*;
 
+pub mod radio;
 pub mod switch;

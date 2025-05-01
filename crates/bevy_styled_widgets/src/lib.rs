@@ -11,7 +11,10 @@ use bevy_asset_loader::prelude::*;
 use bevy_core_widgets::CoreWidgetsPlugin;
 
 use themes::fonts::FontAssets;
-use ui::{button::StyledButtonPlugin, switch::StyledSwitchPlugin, text::StyledTextPlugin};
+use ui::{
+    button::StyledButtonPlugin, radio_group::StyledRadioGroupPlugin, switch::StyledSwitchPlugin,
+    text::StyledTextPlugin,
+};
 
 pub struct StyledWidgetsPligin;
 
@@ -24,6 +27,7 @@ impl Plugin for StyledWidgetsPligin {
             StyledTextPlugin,
             AdditionalCoreWidgetsPlugin,
             StyledSwitchPlugin,
+            StyledRadioGroupPlugin,
         ));
         app.init_collection::<FontAssets>();
     }
@@ -35,6 +39,7 @@ pub mod prelude {
     pub use crate::icon::*;
     pub use crate::themes::*;
     pub use crate::ui::button::*;
+    pub use crate::ui::radio_group::*;
     pub use crate::ui::switch::*;
     pub use crate::ui::text::*;
 }
