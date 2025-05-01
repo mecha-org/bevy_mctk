@@ -2,7 +2,6 @@ use bevy::prelude::*;
 use bevy_core_widgets::{Checked, InteractionDisabled, ValueChange, hover::Hovering};
 
 use super::{
-    RadioButtonSize,
     builder::{RadioValue, RootComponent},
     components::{RadioButtonVariant, StyledRadioButton},
 };
@@ -13,8 +12,7 @@ use bevy_core_widgets::{CoreRadio, CoreRadioGroup};
 pub fn update_radio_button_visuals(
     theme_manager: Res<ThemeManager>,
     mut query: Query<
-        (
-            &mut Node,
+        (            
             &StyledRadioButton,
             &Hovering,
             &Checked,
@@ -28,7 +26,6 @@ pub fn update_radio_button_visuals(
     mut q_caption_text: Query<&mut TextColor>,
 ) {
     for (
-        mut radio_button_node,
         radio_button,
         Hovering(is_hovering),
         Checked(checked),

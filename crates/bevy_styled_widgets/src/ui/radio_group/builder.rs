@@ -6,7 +6,7 @@ use bevy_core_widgets::{Checked, CoreRadio, CoreRadioGroup, hover::Hovering};
 
 use super::{
     RadioButtonSize,
-    components::{AccessibleName, RadioButtonVariant, StyledRadioButton, StyledRadioGroup},
+    components::{AccessibleName, RadioButtonVariant, StyledRadioButton},
 };
 use crate::themes::ThemeManager;
 

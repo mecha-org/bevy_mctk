@@ -1,9 +1,9 @@
 use bevy::{
-    input_focus::tab_navigation::{TabGroup, TabIndex},
+    input_focus::tab_navigation::TabGroup,
     prelude::*,
     winit::WinitSettings,
 };
-use bevy_core_widgets::{Checked, CoreRadioGroup, InteractionDisabled};
+use bevy_core_widgets::{Checked, InteractionDisabled};
 use bevy_styled_widgets::prelude::*;
 
 fn main() {
