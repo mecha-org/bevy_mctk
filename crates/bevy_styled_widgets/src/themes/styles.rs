@@ -6,6 +6,7 @@ use super::{
     ThemeModeConfigs,
     button::{ButtonSizeStyles, ButtonVariantStyles, button_sizes},
     input::InputStyle,
+    checkbox::{CheckboxSizeStyles, CheckboxVariantStyles, checkbox_sizes},
     panel::PanelStyle,
     switch::{SwitchSizeStyles, SwitchVariantStyles, switch_sizes},
     text::TextStyle,
@@ -24,6 +25,8 @@ pub struct ThemeStyles {
     pub input: InputStyle,
     pub toggles: ToggleVariantStyles,
     pub toggle_sizes: ToggleSizeStyles,
+    pub checkboxes: CheckboxVariantStyles,
+    pub checkbox_sizes: CheckboxSizeStyles,
 }
 
 impl ThemeStyles {
@@ -39,6 +42,8 @@ impl ThemeStyles {
             input: InputStyle::from_colors(configs.colors.clone()),
             toggles: ToggleVariantStyles::from_colors(configs.colors.clone()),
             toggle_sizes: toggle_sizes(),
+            checkboxes: CheckboxVariantStyles::from_colors(configs.colors.clone()),
+            checkbox_sizes: checkbox_sizes(),
         }
     }
 }
