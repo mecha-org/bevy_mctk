@@ -1,3 +1,4 @@
+mod icon;
 mod themes;
 mod ui;
 
@@ -11,8 +12,9 @@ use bevy_core_widgets::CoreWidgetsPlugin;
 
 use themes::fonts::FontAssets;
 use ui::{
-    button::StyledButtonPlugin, progress::StyledProgessPlugin, switch::StyledSwitchPlugin,
-    text::StyledTextPlugin,
+    button::StyledButtonPlugin, checkbox::StyledCheckboxPlugin, input::StyledInputPlugin,
+    progress::StyledProgessPlugin, switch::StyledSwitchPlugin, text::StyledTextPlugin,
+    toggle::StyledTogglePlugin,
 };
 
 pub struct StyledWidgetsPligin;
@@ -27,16 +29,24 @@ impl Plugin for StyledWidgetsPligin {
             StyledProgessPlugin,
             AdditionalCoreWidgetsPlugin,
             StyledSwitchPlugin,
+            StyledInputPlugin,
+            StyledTogglePlugin,
+            StyledCheckboxPlugin,
         ));
         app.init_collection::<FontAssets>();
     }
 }
 
+#[allow(ambiguous_glob_reexports)]
 pub mod prelude {
     pub use crate::StyledWidgetsPligin;
+    pub use crate::icon::*;
     pub use crate::themes::*;
     pub use crate::ui::button::*;
+    pub use crate::ui::checkbox::*;
+    pub use crate::ui::input::*;
     pub use crate::ui::progress::*;
     pub use crate::ui::switch::*;
     pub use crate::ui::text::*;
+    pub use crate::ui::toggle::*;
 }
