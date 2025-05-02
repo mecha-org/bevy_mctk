@@ -17,7 +17,10 @@ fn main() {
 }
 
 #[derive(Component)]
-struct ThemeToggleButton;
+pub struct ThemeToggleButton;
+
+#[derive(Component)]
+pub struct ThemeToggleCheckbox;
 
 #[derive(Component)]
 struct RootWindow;
@@ -41,37 +44,35 @@ fn set_theme(id: ThemeId) -> impl FnMut(ResMut<ThemeManager>) + Clone {
 
 fn update_theme_toggle_button(
     theme_manager: Res<ThemeManager>,
-    mut query: Query<&mut StyledButton, With<ThemeToggleButton>>,
+    mut query: Query<&mut StyledToggle, With<ThemeToggleButton>>,
 ) {
-    println!("update_theme_toggle_button()");
-    for mut button in query.iter_mut() {
+    for mut toggle in query.iter_mut() {
         let icon = match theme_manager.current_mode {
             ThemeMode::Light => "dark.png",
             ThemeMode::Dark => "light.png",
         };
-        button.icon = Some(icon.to_string());
+        toggle.icon = Some(icon.to_string());
     }
 }
 
 fn update_light_dark_theme(
-    In((entity, checked)): In<(Entity, bool)>,
+    In(checked): In<bool>,
+    mut query: Query<(&mut StyledCheckbox, Entity), With<ThemeToggleCheckbox>>,
     mut commands: Commands,
-    query: Query<&StyledSwitch>,
     mut theme_manager: ResMut<ThemeManager>,
 ) {
-    if let Ok(styled_switch) = query.get(entity) {
-        if styled_switch.disabled {
+    for (mut styled_checkbox, entity) in &mut query {
+        if styled_checkbox.disabled {
             commands.entity(entity).insert(InteractionDisabled);
             return;
-        } else {
-            let current_mode = theme_manager.current_mode;
-            let new_mode = match current_mode {
-                ThemeMode::Light => ThemeMode::Dark,
-                ThemeMode::Dark => ThemeMode::Light,
-            };
-            theme_manager.set_theme_mode(new_mode);
-            commands.entity(entity).insert(Checked(checked));
         }
+
+        commands.entity(entity).insert(Checked(checked));
+        let new_mode = match theme_manager.current_mode {
+            ThemeMode::Light => ThemeMode::Dark,
+            ThemeMode::Dark => ThemeMode::Light,
+        };
+        theme_manager.set_theme_mode(new_mode);
     }
 }
 
@@ -183,28 +184,24 @@ fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
                     flex_direction: FlexDirection::Row,
                     justify_content: JustifyContent::End,
                     align_items: AlignItems::Center,
-                    column_gap: Val::Px(6.0),
+                    column_gap: Val::Px(4.0),
                     padding: UiRect::axes(Val::Px(12.0), Val::Px(0.0)),
                     ..default()
                 },
-                Children::spawn((
-                    Spawn((StyledText::builder()
-                        .content("Mode Switch")
-                        .font_size(14.0)
-                        .build(),)),
-                    Spawn(
-                        StyledSwitch::builder()
-                            .variant(SwitchVariant::Rounded)
-                            .state(true)
-                            .on_change(on_toogle_theme_mode)
-                            .build(),
-                    ),
-                )),
+                Children::spawn((Spawn((
+                    StyledCheckbox::builder()
+                        .variant(CheckboxVariant::Default)
+                        .on_change(on_toogle_theme_mode)
+                        .caption("Light")
+                        .description("Enable light mode")
+                        .build(),
+                    ThemeToggleCheckbox,
+                )),)),
             )),
-            // Switch section
+            // Checkbox section
             Spawn(
                 StyledText::builder()
-                    .content("Switch")
+                    .content("Checkbox")
                     .font_size(24.0)
                     .build(),
             ),
@@ -221,14 +218,26 @@ fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
                 },
                 Children::spawn((
                     Spawn(
-                        StyledSwitch::builder()
-                            .variant(SwitchVariant::Rounded)
-                            .state(true)
+                        StyledText::builder()
+                            .content("Checked")
+                            .font_size(14.0)
                             .build(),
                     ),
                     Spawn(
-                        StyledSwitch::builder()
-                            .variant(SwitchVariant::Rectangular)
+                        StyledCheckbox::builder()
+                            .variant(CheckboxVariant::Default)
+                            .checked(true)
+                            .build(),
+                    ),
+                    Spawn(
+                        StyledText::builder()
+                            .content("Inactive")
+                            .font_size(14.0)
+                            .build(),
+                    ),
+                    Spawn(
+                        StyledCheckbox::builder()
+                            .variant(CheckboxVariant::WithText)
                             .build(),
                     ),
                 )),
@@ -258,9 +267,10 @@ fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
                             .build(),
                     ),
                     Spawn(
-                        StyledSwitch::builder()
-                            .size(SwitchSize::XSmall)
-                            .variant(SwitchVariant::Rounded)
+                        StyledCheckbox::builder()
+                            .size(CheckboxSize::XSmall)
+                            .variant(CheckboxVariant::Default)
+                            .checked(true)
                             .build(),
                     ),
                     Spawn(
@@ -270,9 +280,10 @@ fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
                             .build(),
                     ),
                     Spawn(
-                        StyledSwitch::builder()
-                            .size(SwitchSize::Small)
-                            .variant(SwitchVariant::Rounded)
+                        StyledCheckbox::builder()
+                            .size(CheckboxSize::Small)
+                            .variant(CheckboxVariant::Default)
+                            .checked(true)
                             .build(),
                     ),
                     Spawn(
@@ -282,9 +293,10 @@ fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
                             .build(),
                     ),
                     Spawn(
-                        StyledSwitch::builder()
-                            .size(SwitchSize::Medium)
-                            .variant(SwitchVariant::Rounded)
+                        StyledCheckbox::builder()
+                            .size(CheckboxSize::Medium)
+                            .variant(CheckboxVariant::Default)
+                            .checked(true)
                             .build(),
                     ),
                     Spawn(
@@ -294,9 +306,10 @@ fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
                             .build(),
                     ),
                     Spawn(
-                        StyledSwitch::builder()
-                            .size(SwitchSize::Large)
-                            .variant(SwitchVariant::Rounded)
+                        StyledCheckbox::builder()
+                            .size(CheckboxSize::Large)
+                            .variant(CheckboxVariant::Default)
+                            .checked(true)
                             .build(),
                     ),
                     Spawn(
@@ -306,9 +319,10 @@ fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
                             .build(),
                     ),
                     Spawn(
-                        StyledSwitch::builder()
-                            .size(SwitchSize::XLarge)
-                            .variant(SwitchVariant::Rounded)
+                        StyledCheckbox::builder()
+                            .size(CheckboxSize::XLarge)
+                            .variant(CheckboxVariant::Default)
+                            .checked(true)
                             .build(),
                     ),
                 )),
@@ -331,9 +345,9 @@ fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
                     ..default()
                 },
                 Children::spawn((Spawn((
-                    StyledSwitch::builder()
-                        .variant(SwitchVariant::Rounded)
-                        .state(true)
+                    StyledCheckbox::builder()
+                        .variant(CheckboxVariant::Default)
+                        .checked(true)
                         .disabled()
                         .build(),
                     InteractionDisabled,
