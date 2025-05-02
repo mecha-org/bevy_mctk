@@ -9,5 +9,6 @@ mod manager;
 pub use manager::*;
 
 pub mod checkbox;
+pub mod progress;
 pub mod switch;
 pub mod toggle;

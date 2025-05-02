@@ -5,9 +5,10 @@ use bevy::prelude::*;
 use super::{
     ThemeModeConfigs,
     button::{ButtonSizeStyles, ButtonVariantStyles, button_sizes},
-    input::InputStyle,
     checkbox::{CheckboxSizeStyles, CheckboxVariantStyles, checkbox_sizes},
+    input::InputStyle,
     panel::PanelStyle,
+    progress::ProgressStyle,
     switch::{SwitchSizeStyles, SwitchVariantStyles, switch_sizes},
     text::TextStyle,
     toggle::{ToggleSizeStyles, ToggleVariantStyles, toggle_sizes},
@@ -27,6 +28,7 @@ pub struct ThemeStyles {
     pub toggle_sizes: ToggleSizeStyles,
     pub checkboxes: CheckboxVariantStyles,
     pub checkbox_sizes: CheckboxSizeStyles,
+    pub progress: ProgressStyle,
 }
 
 impl ThemeStyles {
@@ -44,6 +46,7 @@ impl ThemeStyles {
             toggle_sizes: toggle_sizes(),
             checkboxes: CheckboxVariantStyles::from_colors(configs.colors.clone()),
             checkbox_sizes: checkbox_sizes(),
+            progress: ProgressStyle::from_colors(configs.colors.clone()),
         }
     }
 }
