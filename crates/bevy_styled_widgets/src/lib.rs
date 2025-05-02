@@ -12,7 +12,7 @@ use bevy_core_widgets::CoreWidgetsPlugin;
 
 use themes::fonts::FontAssets;
 use ui::{
-    button::StyledButtonPlugin, checkbox::StyledCheckboxPlugin, switch::StyledSwitchPlugin,
+    button::StyledButtonPlugin,  input::StyledInputPlugin, checkbox::StyledCheckboxPlugin, switch::StyledSwitchPlugin,
     text::StyledTextPlugin, toggle::StyledTogglePlugin,
 };
 
@@ -27,6 +27,7 @@ impl Plugin for StyledWidgetsPligin {
             StyledTextPlugin,
             AdditionalCoreWidgetsPlugin,
             StyledSwitchPlugin,
+            StyledInputPlugin,
             StyledTogglePlugin,
             StyledCheckboxPlugin,
         ));
@@ -40,6 +41,7 @@ pub mod prelude {
     pub use crate::icon::*;
     pub use crate::themes::*;
     pub use crate::ui::button::*;
+    pub use crate::ui::input::*;
     pub use crate::ui::checkbox::*;
     pub use crate::ui::switch::*;
     pub use crate::ui::text::*;
