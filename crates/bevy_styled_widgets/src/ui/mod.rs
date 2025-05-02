@@ -6,3 +6,5 @@ pub mod slider;
 pub mod switch;
 pub mod text;
 pub mod toggle;
+
+pub mod radio_group;

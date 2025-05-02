@@ -10,6 +10,7 @@ use super::{
     panel::PanelStyle,
     progress::ProgressStyle,
     slider::SliderStyle,
+    radio::{RadioButtonSizeStyles, RadioButtonVariantStyles, radio_button_sizes},
     switch::{SwitchSizeStyles, SwitchVariantStyles, switch_sizes},
     text::TextStyle,
     toggle::{ToggleSizeStyles, ToggleVariantStyles, toggle_sizes},
@@ -31,6 +32,8 @@ pub struct ThemeStyles {
     pub checkbox_sizes: CheckboxSizeStyles,
     pub progress: ProgressStyle,
     pub slider: SliderStyle,
+    pub radio_buttons: RadioButtonVariantStyles,
+    pub radio_button_sizes: RadioButtonSizeStyles,
 }
 
 impl ThemeStyles {
@@ -50,6 +53,8 @@ impl ThemeStyles {
             checkbox_sizes: checkbox_sizes(),
             progress: ProgressStyle::from_colors(configs.colors.clone()),
             slider: SliderStyle::from_colors(configs.colors.clone()),
+            radio_buttons: RadioButtonVariantStyles::from_colors(configs.colors.clone()),
+            radio_button_sizes: radio_button_sizes(),
         }
     }
 }

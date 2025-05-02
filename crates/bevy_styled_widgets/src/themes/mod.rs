@@ -11,5 +11,6 @@ pub use manager::*;
 pub mod checkbox;
 pub mod progress;
 pub mod slider;
+pub mod radio;
 pub mod switch;
 pub mod toggle;

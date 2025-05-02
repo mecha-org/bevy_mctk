@@ -12,8 +12,9 @@ use bevy_core_widgets::CoreWidgetsPlugin;
 
 use themes::fonts::FontAssets;
 use ui::{
+    
     button::StyledButtonPlugin, checkbox::StyledCheckboxPlugin, input::StyledInputPlugin,
-    progress::StyledProgessPlugin, slider::StyledSliderPlugin, switch::StyledSwitchPlugin,
+    progress::StyledProgessPlugin, slider::StyledSliderPlugin, radio_group::StyledRadioGroupPlugin, switch::StyledSwitchPlugin,
     text::StyledTextPlugin, toggle::StyledTogglePlugin,
 };
 
@@ -33,6 +34,7 @@ impl Plugin for StyledWidgetsPligin {
             StyledTogglePlugin,
             StyledCheckboxPlugin,
             StyledSliderPlugin,
+            StyledRadioGroupPlugin,
         ));
         app.init_collection::<FontAssets>();
     }
@@ -48,6 +50,7 @@ pub mod prelude {
     pub use crate::ui::input::*;
     pub use crate::ui::progress::*;
     pub use crate::ui::slider::*;
+    pub use crate::ui::radio_group::*;
     pub use crate::ui::switch::*;
     pub use crate::ui::text::*;
     pub use crate::ui::toggle::*;
