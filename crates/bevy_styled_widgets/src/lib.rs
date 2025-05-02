@@ -13,9 +13,9 @@ use bevy_core_widgets::CoreWidgetsPlugin;
 use themes::fonts::FontAssets;
 use ui::{
     
-    button::StyledButtonPlugin,  input::StyledInputPlugin, checkbox::StyledCheckboxPlugin, radio_group::StyledRadioGroupPlugin, switch::StyledSwitchPlugin,
+    button::StyledButtonPlugin, checkbox::StyledCheckboxPlugin, input::StyledInputPlugin,
+    progress::StyledProgessPlugin, slider::StyledSliderPlugin, radio_group::StyledRadioGroupPlugin, switch::StyledSwitchPlugin,
     text::StyledTextPlugin, toggle::StyledTogglePlugin,
-,
 };
 
 pub struct StyledWidgetsPligin;
@@ -27,11 +27,13 @@ impl Plugin for StyledWidgetsPligin {
             InputDispatchPlugin,
             StyledButtonPlugin,
             StyledTextPlugin,
+            StyledProgessPlugin,
             AdditionalCoreWidgetsPlugin,
             StyledSwitchPlugin,
             StyledInputPlugin,
             StyledTogglePlugin,
             StyledCheckboxPlugin,
+            StyledSliderPlugin,
             StyledRadioGroupPlugin,
         ));
         app.init_collection::<FontAssets>();
@@ -44,8 +46,10 @@ pub mod prelude {
     pub use crate::icon::*;
     pub use crate::themes::*;
     pub use crate::ui::button::*;
-    pub use crate::ui::input::*;
     pub use crate::ui::checkbox::*;
+    pub use crate::ui::input::*;
+    pub use crate::ui::progress::*;
+    pub use crate::ui::slider::*;
     pub use crate::ui::radio_group::*;
     pub use crate::ui::switch::*;
     pub use crate::ui::text::*;
