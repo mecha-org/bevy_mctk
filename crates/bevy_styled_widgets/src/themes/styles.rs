@@ -9,6 +9,7 @@ use super::{
     panel::PanelStyle,
     switch::{SwitchSizeStyles, SwitchVariantStyles, switch_sizes},
     text::TextStyle,
+    toggle::{ToggleSizeStyles, ToggleVariantStyles, toggle_sizes},
 };
 
 #[derive(Debug, Clone)]
@@ -21,6 +22,8 @@ pub struct ThemeStyles {
     pub switches: SwitchVariantStyles,
     pub switch_sizes: SwitchSizeStyles,
     pub input: InputStyle,
+    pub toggles: ToggleVariantStyles,
+    pub toggle_sizes: ToggleSizeStyles,
 }
 
 impl ThemeStyles {
@@ -34,6 +37,8 @@ impl ThemeStyles {
             switch_sizes: switch_sizes(),
             icons: configs.icons.clone(),
             input: InputStyle::from_colors(configs.colors.clone()),
+            toggles: ToggleVariantStyles::from_colors(configs.colors.clone()),
+            toggle_sizes: toggle_sizes(),
         }
     }
 }

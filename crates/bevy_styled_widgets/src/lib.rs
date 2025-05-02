@@ -12,8 +12,8 @@ use bevy_core_widgets::CoreWidgetsPlugin;
 
 use themes::fonts::FontAssets;
 use ui::{
-    button::StyledButtonPlugin, input::StyledInputPlugin, switch::StyledSwitchPlugin,
-    text::StyledTextPlugin,
+    button::StyledButtonPlugin,  input::StyledInputPlugin, switch::StyledSwitchPlugin, text::StyledTextPlugin,
+    toggle::StyledTogglePlugin,
 };
 
 pub struct StyledWidgetsPligin;
@@ -28,6 +28,7 @@ impl Plugin for StyledWidgetsPligin {
             AdditionalCoreWidgetsPlugin,
             StyledSwitchPlugin,
             StyledInputPlugin,
+            StyledTogglePlugin,
         ));
         app.init_collection::<FontAssets>();
     }
@@ -42,4 +43,5 @@ pub mod prelude {
     pub use crate::ui::input::*;
     pub use crate::ui::switch::*;
     pub use crate::ui::text::*;
+    pub use crate::ui::toggle::*;
 }
