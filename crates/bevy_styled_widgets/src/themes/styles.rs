@@ -9,6 +9,7 @@ use super::{
     input::InputStyle,
     panel::PanelStyle,
     progress::ProgressStyle,
+    slider::SliderStyle,
     switch::{SwitchSizeStyles, SwitchVariantStyles, switch_sizes},
     text::TextStyle,
     toggle::{ToggleSizeStyles, ToggleVariantStyles, toggle_sizes},
@@ -29,6 +30,7 @@ pub struct ThemeStyles {
     pub checkboxes: CheckboxVariantStyles,
     pub checkbox_sizes: CheckboxSizeStyles,
     pub progress: ProgressStyle,
+    pub slider: SliderStyle,
 }
 
 impl ThemeStyles {
@@ -47,6 +49,7 @@ impl ThemeStyles {
             checkboxes: CheckboxVariantStyles::from_colors(configs.colors.clone()),
             checkbox_sizes: checkbox_sizes(),
             progress: ProgressStyle::from_colors(configs.colors.clone()),
+            slider: SliderStyle::from_colors(configs.colors.clone()),
         }
     }
 }
