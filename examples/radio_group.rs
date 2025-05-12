@@ -89,6 +89,7 @@ fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
                 .value("dark")
                 .checked(theme.current_mode == ThemeMode::Dark),
         ])
+        .direction(RadioButtonDirection::Vertical)
         .build();
 
     commands

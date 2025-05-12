@@ -6,7 +6,7 @@ use bevy_core_widgets::{Checked, CoreRadio, CoreRadioGroup, hover::Hovering};
 
 use super::{
     RadioButtonSize,
-    components::{AccessibleName, RadioButtonVariant, StyledRadioButton},
+    components::{AccessibleName, RadioButtonVariant, StyledRadioButton, RadioButtonDirection},
 };
 use crate::themes::ThemeManager;
 
@@ -157,9 +157,6 @@ impl RadioButtonBuilder {
                 display: Display::Flex,
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
-                padding: UiRect::axes(Val::Px(10.0), Val::Px(4.0)),
-                border: UiRect::all(Val::Px(1.0)),
-                column_gap: Val::Px(4.0),
                 ..default()
             },
             Name::new("Radio"),
@@ -189,6 +186,7 @@ impl RadioButtonBuilder {
 pub struct RadioGroupBuilder {
     pub on_change: Option<SystemId<In<Entity>>>,
     pub children: Vec<RadioButtonBuilder>,
+    pub direction: RadioButtonDirection,
 }
 
 impl RadioGroupBuilder {
@@ -202,6 +200,11 @@ impl RadioGroupBuilder {
         self
     }
 
+    pub fn direction(mut self, direction: RadioButtonDirection) -> Self {
+        self.direction = direction;
+        self
+    }
+
     pub fn build(self) -> (impl Bundle, Vec<impl Bundle>) {
         let child_bundles = self
             .children
@@ -209,10 +212,15 @@ impl RadioGroupBuilder {
             .map(|builder| builder.build())
             .collect::<Vec<_>>();
 
+        let flex_direction = match self.direction {
+            RadioButtonDirection::Vertical => FlexDirection::Column,
+            RadioButtonDirection::Horizontal => FlexDirection::Row,
+        };
+
         let parent_bundle = (
             Node {
                 display: Display::Flex,
-                flex_direction: FlexDirection::Column,
+                flex_direction,
                 justify_content: JustifyContent::Start,
                 align_items: AlignItems::Start,
                 align_content: AlignContent::Start,
