@@ -123,14 +123,14 @@ pub fn update_checkbox_visuals(
             {
                 if caption_desc_children.len() >= 2 {
                     // Caption
-                    if let Ok((mut caption_text, mut caption_color)) =
+                    if let Ok((_caption_text, mut caption_color)) =
                         q_text.get_mut(caption_desc_children[0])
                     {
                         caption_color.0 = checkbox_style.caption_color;
                     }
 
                     // Description
-                    if let Ok((mut desc_text, mut desc_color)) =
+                    if let Ok((_desc_text, mut desc_color)) =
                         q_text.get_mut(caption_desc_children[1])
                     {
                         desc_color.0 = checkbox_style.description_color;
