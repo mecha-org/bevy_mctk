@@ -8,3 +8,4 @@ pub mod text;
 pub mod toggle;
 
 pub mod radio_group;
+pub mod select;
