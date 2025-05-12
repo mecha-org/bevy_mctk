@@ -58,7 +58,6 @@ impl SelectItemBuilder {
     pub fn build(self) -> impl Bundle {
         let is_selected = self.selected;
         let is_disabled = self.disabled;
-        let width = 144.0;
         let height = 52.0;
 
         let key = self.key.clone().unwrap_or_else(|| "".to_string());
@@ -66,21 +65,23 @@ impl SelectItemBuilder {
         let child_nodes = Children::spawn((
             Spawn((
                 Node {
-                    display: Display::Block,
+                    display: Display::Flex,
                     flex_direction: FlexDirection::Row,
-                    justify_content: JustifyContent::Center,
+                    justify_content: JustifyContent::FlexStart,
                     align_items: AlignItems::Center,
-                    align_content: AlignContent::Center,
-                    min_width: Val::Px(width),
-                    min_height: Val::Px(height),
+                    padding: UiRect::axes(Val::Px(8.0), Val::Px(4.0)),
+                    width: Val::Percent(100.0),
+                    height: Val::Px(height),
                     ..default()
                 },
                 Name::new(self.key.clone().unwrap_or("".to_string())),
-                Text::new(self.value.clone()),
-                TextFont {
-                    font_size: 14.0,
-                    ..default()
-                },
+                Children::spawn(Spawn((
+                    Text::new(self.value.clone()),
+                    TextFont {
+                        font_size: 14.,
+                        ..Default::default()
+                    },
+                ))),
             )),
             //
         ));
@@ -89,8 +90,8 @@ impl SelectItemBuilder {
             Node {
                 display: Display::None, // Initially hidden
                 flex_direction: FlexDirection::Column,
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
+                justify_content: JustifyContent::FlexStart,
+                align_items: AlignItems::Stretch,
                 width: Val::Percent(100.0),
                 height: Val::Auto,
                 padding: UiRect::axes(Val::Px(0.0), Val::Px(4.0)),
@@ -185,12 +186,11 @@ impl SelectBuilder {
             Node {
                 display: Display::Flex,
                 flex_direction: FlexDirection::Row,
-                justify_content: JustifyContent::Center,
+                justify_content: JustifyContent::FlexStart,
                 align_items: AlignItems::Center,
-                align_content: AlignContent::Center,
                 min_width: Val::Px(button_width),
                 min_height: Val::Px(button_height),
-                padding: UiRect::axes(Val::Px(28.), Val::Px(10.)),
+                padding: UiRect::axes(Val::Px(4.), Val::Px(4.)),
                 ..default()
             },
             StyledSelect {
@@ -213,22 +213,20 @@ impl SelectBuilder {
             TabIndex(0),
             BorderRadius::default(),
             BorderColor::default(),
-            Text::new(self.selected_value.clone().unwrap_or("Select".to_string())),
-            TextFont {
-                font_size: 14.,
-                ..Default::default()
-            },
+            Children::spawn(Spawn((
+                Text::new(self.selected_value.clone().unwrap_or("Select".to_string())),
+                TextFont {
+                    font_size: 14.,
+                    ..Default::default()
+                },
+            ))),
         )),));
 
         let select_content_bundle = (
             Node {
                 display: Display::Flex,
-                flex_direction: FlexDirection::Column, // Dropdown items in a column
-                justify_content: JustifyContent::FlexStart, // Align children to the start
-                align_items: AlignItems::FlexStart,    // Align items to the start
-                align_content: AlignContent::FlexStart, // Align content to the start
-                width: Val::Px(button_width),          // Match the width of the trigger button
-                // max_height: Val::Px(200.0),
+                flex_direction: FlexDirection::Column,
+                width: Val::Px(button_width),
                 ..default()
             },
             CoreSelectContent {

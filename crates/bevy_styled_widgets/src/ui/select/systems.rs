@@ -51,34 +51,57 @@ pub fn on_select_item_selection(
     mut trigger: Trigger<ValueChange<Entity>>,
     q_select_content: Query<&Children, With<CoreSelectContent>>,
     q_select_item: Query<(&ChildOf, &SelectedValue), With<CoreSelectItem>>,
-    mut q_trigger_text: Query<(&mut Text, &mut Name), With<CoreSelectTrigger>>,
+    q_select_trigger: Query<(&StyledSelect, &Children), With<CoreSelectTrigger>>,
+    mut q_text: Query<&mut Text>,
+    mut q_name: Query<&mut Name>,
     mut commands: Commands,
 ) {
     trigger.propagate(false);
-    if q_select_content.contains(trigger.target()) {
-        let selected_entity = trigger.event().0;
 
-        let (child_of, selected_value) = q_select_item.get(selected_entity.clone()).unwrap();
-        let group_children = q_select_content.get(child_of.parent()).unwrap();
+    let target = trigger.target();
 
-        for select_item_child in group_children.iter() {
-            if let Ok((_, value)) = q_select_item.get(select_item_child) {
-                commands
-                    .entity(select_item_child)
-                    .insert(Checked(value.0 == selected_value.0.clone()));
+    // Ensure the trigger target is CoreSelectContent
+    if !q_select_content.contains(target) {
+        return;
+    }
+
+    let selected_entity = trigger.event().0;
+
+    // Get the selected item's value and the parent content it belongs to
+    let (child_of, selected_value) = match q_select_item.get(selected_entity) {
+        Ok(res) => res,
+        Err(_) => return,
+    };
+
+    let group_children = match q_select_content.get(child_of.parent()) {
+        Ok(children) => children,
+        Err(_) => return,
+    };
+
+    // Deselect all others in the same CoreSelectContent group
+    for child in group_children.iter() {
+        if let Ok((_, value)) = q_select_item.get(child) {
+            commands
+                .entity(child)
+                .insert(Checked(value.0 == selected_value.0));
+        }
+    }
+
+    // Update the trigger text
+    for (_styled_select, trigger_children) in q_select_trigger.iter() {
+        for child in trigger_children.iter() {
+            if let Ok(mut text) = q_text.get_mut(child) {
+                text.0 = selected_value.0.clone();
+            }
+
+            if let Ok(mut name) = q_name.get_mut(child) {
+                name.set(selected_value.0.clone());
             }
         }
-
-        // Update the SelectTrigger text to match selected_value
-        for (mut text, mut name) in q_trigger_text.iter_mut() {
-            text.0 = selected_value.0.clone();
-            name.set(selected_value.0.clone());
-        }
-
-        commands
-            .entity(trigger.target())
-            .insert(SelectHasPopup(false));
     }
+
+    // Close dropdown
+    commands.entity(target).insert(SelectHasPopup(false));
 }
 
 #[allow(clippy::type_complexity)]
