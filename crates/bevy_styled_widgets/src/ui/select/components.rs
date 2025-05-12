@@ -29,6 +29,8 @@ pub struct StyledSelect {
     pub on_click: Option<SystemId<In<bool>>>,
     #[reflect(ignore)]
     pub on_change: Option<SystemId<In<Entity>>>,
+    #[reflect(ignore)]
+    pub size: Option<SelectButtonSize>,
     pub selected_value: Option<String>,
     pub disabled: bool,
 }
@@ -37,6 +39,16 @@ impl StyledSelect {
     pub fn builder() -> super::builder::SelectBuilder {
         super::builder::SelectBuilder::default()
     }
+}
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, Component)]
+pub enum SelectButtonSize {
+    XSmall,
+    Small,
+    #[default]
+    Medium,
+    Large,
+    XLarge,
 }
 
 #[derive(Component, Default)]
