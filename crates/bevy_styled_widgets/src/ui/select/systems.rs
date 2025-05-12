@@ -149,7 +149,7 @@ pub fn update_select_visuals(
         if item.disabled || is_disabled {
             *bg_color = BackgroundColor(LIGHT_GRAY.into());
         } else if hovering.0 {
-            *bg_color = BackgroundColor(bevy::color::palettes::css::LIGHT_GRAY.into());
+            *bg_color = BackgroundColor(bevy::color::palettes::css::SLATE_GREY.into());
         } else if item.selected || option_state.is_selected || *checked {
             *bg_color = BackgroundColor(bevy::color::palettes::css::DARK_GREY.into());
         } else {
