@@ -3,21 +3,47 @@ use bevy::prelude::*;
 use super::ThemeColors;
 
 #[derive(Debug, Clone)]
-pub struct SelectButtonStyle {
+pub struct SelectButtonStyles {
     // Colors
-    pub normal_background: Color,
-    pub hovered_background: Color,
-    pub pressed_background: Color,
-    pub text_color: Color,
-    pub border_color: Color,
+    // trigger
+    pub button_background: Color,
+    pub button_text_color: Color,
+    pub button_border_color: Color,
 
-    // Effects
-    pub shadow_color: Color,
-    pub shadow_offset: Vec2,
-    pub shadow_blur: f32,
+    // items
+    pub popover_background: Color,
+    pub popover_border_color: Color,
 
-    // Transitions
-    pub transition_duration: f32, // in seconds
+    pub hovered_item_background: Color,
+    pub active_item_background: Color,
+
+    pub active_border_color: Color,
+
+    pub disabled_background: Color,
+    pub disabled_text_color: Color,
+    pub disabled_border_color: Color,
+}
+
+impl SelectButtonStyles {
+    pub fn from_colors(colors: ThemeColors) -> Self {
+        Self {
+            button_background: colors.primary,
+            button_text_color: colors.primary_foreground,
+            button_border_color: colors.border,
+
+            popover_background: colors.primary,
+            popover_border_color: colors.border,
+
+            hovered_item_background: colors.primary.with_alpha(0.9),
+            active_item_background: colors.primary.with_alpha(0.7),
+
+            active_border_color: colors.border,
+
+            disabled_background: colors.secondary.with_alpha(0.5),
+            disabled_text_color: colors.secondary.with_alpha(0.5),
+            disabled_border_color: Color::NONE,
+        }
+    }
 }
 
 // Button size properties

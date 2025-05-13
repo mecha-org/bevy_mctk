@@ -2,8 +2,6 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 
-use crate::prelude::SelectButtonSize;
-
 use super::{
     ThemeModeConfigs,
     button::{ButtonSizeStyles, ButtonVariantStyles, button_sizes},
@@ -12,7 +10,7 @@ use super::{
     panel::PanelStyle,
     progress::ProgressStyle,
     radio::{RadioButtonSizeStyles, RadioButtonVariantStyles, radio_button_sizes},
-    select::{SelectButtonSizeStyles, select_button_sizes},
+    select::{SelectButtonSizeStyles, SelectButtonStyles, select_button_sizes},
     slider::SliderStyle,
     switch::{SwitchSizeStyles, SwitchVariantStyles, switch_sizes},
     text::TextStyle,
@@ -38,6 +36,7 @@ pub struct ThemeStyles {
     pub radio_buttons: RadioButtonVariantStyles,
     pub radio_button_sizes: RadioButtonSizeStyles,
     pub select_sizes: SelectButtonSizeStyles,
+    pub select_button_styles: SelectButtonStyles,
 }
 
 impl ThemeStyles {
@@ -60,6 +59,7 @@ impl ThemeStyles {
             radio_buttons: RadioButtonVariantStyles::from_colors(configs.colors.clone()),
             radio_button_sizes: radio_button_sizes(),
             select_sizes: select_button_sizes(),
+            select_button_styles: SelectButtonStyles::from_colors(configs.colors.clone()),
         }
     }
 }

@@ -1,10 +1,14 @@
-use bevy::{color::palettes::css::LIGHT_GRAY, prelude::*};
+use bevy::prelude::*;
 use bevy_additional_core_widgets::{
     CoreSelectContent, CoreSelectItem, CoreSelectTrigger, ListBoxOptionState, SelectHasPopup,
 };
 use bevy_core_widgets::{Checked, InteractionDisabled, ValueChange, hover::Hovering};
 
-use super::{SelectContent, StyledSelect, StyledSelectItem, builder::SelectedValue};
+use crate::themes::ThemeManager;
+
+use super::{
+    SelectButtonSize, SelectContent, StyledSelect, StyledSelectItem, builder::SelectedValue,
+};
 
 #[allow(clippy::type_complexity)]
 pub fn on_select_triggered(
@@ -31,16 +35,25 @@ pub fn on_select_triggered(
 }
 
 pub fn open_select_popup(
-    mut content_query: Query<&mut Node, With<SelectContent>>,
+    mut query_set: ParamSet<(
+        Query<&mut Node, With<SelectContent>>,
+        Query<&mut Node, With<CoreSelectContent>>,
+    )>,
     has_popup_query: Query<&SelectHasPopup, Changed<SelectHasPopup>>,
 ) {
     for SelectHasPopup(is_open) in has_popup_query.iter() {
         if *is_open {
-            for mut content in content_query.iter_mut() {
+            for mut content in query_set.p0().iter_mut() {
+                content.display = Display::Flex;
+            }
+            for mut content in query_set.p1().iter_mut() {
                 content.display = Display::Flex;
             }
         } else {
-            for mut content in content_query.iter_mut() {
+            for mut content in query_set.p0().iter_mut() {
+                content.display = Display::None;
+            }
+            for mut content in query_set.p1().iter_mut() {
                 content.display = Display::None;
             }
         }
@@ -106,15 +119,20 @@ pub fn on_select_item_selection(
 
 #[allow(clippy::type_complexity)]
 pub fn update_select_visuals(
+    theme_manager: Res<ThemeManager>,
     mut query_set: ParamSet<(
         Query<
             (
+                &mut Node,
                 &Hovering,
                 &SelectHasPopup,
+                &mut StyledSelect,
                 &mut BackgroundColor,
+                &mut BorderColor,
+                &mut BorderRadius,
                 Has<InteractionDisabled>,
             ),
-            (With<CoreSelectTrigger>, With<StyledSelect>),
+            (With<StyledSelect>, With<CoreSelectTrigger>),
         >,
         Query<
             (
@@ -128,17 +146,57 @@ pub fn update_select_visuals(
             With<CoreSelectItem>,
         >,
     )>,
+    mut core_select_content_query: Query<
+        (
+            &mut Node,
+            &mut BorderColor,
+            &mut BorderRadius,
+            &StyledSelect,
+        ),
+        (With<CoreSelectContent>, Without<CoreSelectTrigger>),
+    >,
 ) {
+    let select_button_styles = theme_manager.styles.select_button_styles.clone();
+
     // Query 0: Trigger
-    for (hovering, has_popup, mut bg_color, is_disabled) in query_set.p0().iter_mut() {
+    for (
+        mut select_trigger_node,
+        Hovering(is_hovering),
+        SelectHasPopup(has_popup),
+        select_button,
+        mut bg_color,
+        mut border_color,
+        mut border_radius,
+        is_disabled,
+    ) in query_set.p0().iter_mut()
+    {
+        let select_button_size_styles = theme_manager.styles.select_sizes.clone();
+
+        let select_button_size_style = match select_button.size.unwrap_or_default() {
+            SelectButtonSize::XSmall => select_button_size_styles.xsmall,
+            SelectButtonSize::Small => select_button_size_styles.small,
+            SelectButtonSize::Medium => select_button_size_styles.medium,
+            SelectButtonSize::Large => select_button_size_styles.large,
+            SelectButtonSize::XLarge => select_button_size_styles.xlarge,
+        };
+
+        select_trigger_node.border = UiRect::all(Val::Px(select_button_size_style.border_width));
+
+        // border radius
+        border_radius.top_left = Val::Px(select_button_size_style.border_radius);
+        border_radius.top_right = Val::Px(select_button_size_style.border_radius);
+        border_radius.bottom_left = Val::Px(select_button_size_style.border_radius);
+        border_radius.bottom_right = Val::Px(select_button_size_style.border_radius);
+
         if is_disabled {
-            *bg_color = BackgroundColor(LIGHT_GRAY.into());
-        } else if has_popup.0 {
-            *bg_color = BackgroundColor(bevy::color::palettes::css::LIGHT_GRAY.into());
-        } else if has_popup.0 || hovering.0 {
-            *bg_color = BackgroundColor(bevy::color::palettes::css::LIGHT_GRAY.into());
+            *bg_color = BackgroundColor(select_button_styles.disabled_background);
+            *border_color = BorderColor(select_button_styles.disabled_border_color);
+        } else if *has_popup || *is_hovering {
+            *bg_color = BackgroundColor(select_button_styles.button_background);
+            *border_color = BorderColor(select_button_styles.active_border_color);
         } else {
-            *bg_color = BackgroundColor(bevy::color::palettes::css::GRAY.into());
+            *bg_color = BackgroundColor(select_button_styles.button_background);
+            *border_color = BorderColor(select_button_styles.active_border_color);
         }
     }
 
@@ -147,13 +205,37 @@ pub fn update_select_visuals(
         query_set.p1().iter_mut()
     {
         if item.disabled || is_disabled {
-            *bg_color = BackgroundColor(LIGHT_GRAY.into());
+            *bg_color = BackgroundColor(select_button_styles.disabled_background);
         } else if hovering.0 {
-            *bg_color = BackgroundColor(bevy::color::palettes::css::SLATE_GREY.into());
+            *bg_color = BackgroundColor(select_button_styles.hovered_item_background);
         } else if item.selected || option_state.is_selected || *checked {
-            *bg_color = BackgroundColor(bevy::color::palettes::css::DARK_GREY.into());
+            *bg_color = BackgroundColor(select_button_styles.active_item_background);
         } else {
-            *bg_color = BackgroundColor(bevy::color::palettes::css::GRAY.into());
+            *bg_color = BackgroundColor(select_button_styles.popover_background);
         }
+    }
+
+    // Update the CoreSelectContent background and border color
+    for (mut core_select_content_node, mut border_color, mut border_radius, select) in
+        core_select_content_query.iter_mut()
+    {
+        let select_button_size_styles = theme_manager.styles.select_sizes.clone();
+
+        let select_button_size_style = match select.size.unwrap_or_default() {
+            SelectButtonSize::XSmall => select_button_size_styles.xsmall,
+            SelectButtonSize::Small => select_button_size_styles.small,
+            SelectButtonSize::Medium => select_button_size_styles.medium,
+            SelectButtonSize::Large => select_button_size_styles.large,
+            SelectButtonSize::XLarge => select_button_size_styles.xlarge,
+        };
+        core_select_content_node.border =
+            UiRect::all(Val::Px(select_button_size_style.border_width));
+        *border_color = BorderColor(select_button_styles.popover_border_color);
+
+        // border radius
+        border_radius.top_left = Val::Px(select_button_size_style.border_radius);
+        border_radius.top_right = Val::Px(select_button_size_style.border_radius);
+        border_radius.bottom_left = Val::Px(select_button_size_style.border_radius);
+        border_radius.bottom_right = Val::Px(select_button_size_style.border_radius);
     }
 }
