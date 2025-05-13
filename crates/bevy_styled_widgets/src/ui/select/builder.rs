@@ -8,8 +8,10 @@ use bevy_additional_core_widgets::{
 };
 use bevy_core_widgets::{Checked, hover::Hovering};
 
+use crate::themes::ThemeManager;
+
 use super::{
-    StyledSelect,
+    SelectButtonSize, StyledSelect,
     components::{AccessibleName, StyledSelectItem},
 };
 use accesskit::{Node as Accessible, Role};
@@ -27,6 +29,7 @@ pub struct SelectItemBuilder {
     pub disabled: bool,
     pub key: Option<String>,
     pub value: String,
+    pub size: Option<SelectButtonSize>,
 }
 
 impl SelectItemBuilder {
@@ -55,12 +58,30 @@ impl SelectItemBuilder {
         self
     }
 
+    pub fn size(mut self, size: SelectButtonSize) -> Self {
+        self.size = Some(size);
+        self
+    }
+
     pub fn build(self) -> impl Bundle {
         let is_selected = self.selected;
-        let is_disabled = self.disabled;
-        let height = 52.0;
+        // let is_disabled = self.disabled;
+
+        let theme_manager = ThemeManager::default();
+        let select_button_size_styles = theme_manager.styles.select_sizes.clone();
+        // Update size styles
+        let select_button_size_style = match self.size.unwrap_or_default() {
+            SelectButtonSize::XSmall => select_button_size_styles.xsmall,
+            SelectButtonSize::Small => select_button_size_styles.small,
+            SelectButtonSize::Medium => select_button_size_styles.medium,
+            SelectButtonSize::Large => select_button_size_styles.large,
+            SelectButtonSize::XLarge => select_button_size_styles.xlarge,
+        };
+        let height = select_button_size_style.min_height;
+        let font_size = select_button_size_style.font_size;
 
         let key = self.key.clone().unwrap_or_else(|| "".to_string());
+
         // select content- dropdown
         let child_nodes = Children::spawn((
             Spawn((
@@ -78,7 +99,7 @@ impl SelectItemBuilder {
                 Children::spawn(Spawn((
                     Text::new(self.value.clone()),
                     TextFont {
-                        font_size: 14.,
+                        font_size: font_size,
                         ..Default::default()
                     },
                 ))),
@@ -132,11 +153,12 @@ pub struct SelectTrigger;
 
 #[derive(Default, Clone)]
 pub struct SelectBuilder {
-    pub on_click: Option<SystemId<In<bool>>>,
-    pub on_change: Option<SystemId<In<Entity>>>,
-    pub children: Vec<SelectItemBuilder>,
-    pub selected_value: Option<String>,
-    pub disabled: bool,
+    on_click: Option<SystemId<In<bool>>>,
+    on_change: Option<SystemId<In<Entity>>>,
+    children: Vec<SelectItemBuilder>,
+    selected_value: Option<String>,
+    disabled: bool,
+    size: Option<SelectButtonSize>,
 }
 
 impl SelectBuilder {
@@ -165,10 +187,27 @@ impl SelectBuilder {
         self
     }
 
-    // pub fn build(self) -> (impl Bundle, Vec<impl Bundle>) {
+    pub fn size(mut self, size: SelectButtonSize) -> Self {
+        self.size = Some(size);
+        self
+    }
+
     pub fn build(self) -> (impl Bundle, impl Bundle, impl Bundle, Vec<impl Bundle>) {
-        let button_width = 144.0;
-        let button_height = 52.0;
+        let theme_manager = ThemeManager::default();
+        let select_button_size_styles = theme_manager.styles.select_sizes.clone();
+        // Update size styles
+        let select_button_size_style = match self.size.unwrap_or_default() {
+            SelectButtonSize::XSmall => select_button_size_styles.xsmall,
+            SelectButtonSize::Small => select_button_size_styles.small,
+            SelectButtonSize::Medium => select_button_size_styles.medium,
+            SelectButtonSize::Large => select_button_size_styles.large,
+            SelectButtonSize::XLarge => select_button_size_styles.xlarge,
+        };
+
+        let button_width = select_button_size_style.min_width;
+        let button_height = select_button_size_style.min_height;
+
+        let font_size = select_button_size_style.font_size;
 
         let parent_bundle = (
             Node {
@@ -199,6 +238,7 @@ impl SelectBuilder {
                 selected_value: self.selected_value.clone(),
                 disabled: self.disabled,
                 on_change: self.on_change,
+                size: self.size,
             },
             BackgroundColor(GRAY.into()),
             Name::new(self.selected_value.clone().unwrap_or("Select".to_string())), // Name::new("Select"),
@@ -211,12 +251,18 @@ impl SelectBuilder {
             },
             AccessibilityNode(Accessible::new(Role::Button)),
             TabIndex(0),
-            BorderRadius::default(),
+            BorderRadius {
+                top_left: Val::Px(select_button_size_style.border_radius),
+                top_right: Val::Px(select_button_size_style.border_radius),
+                bottom_left: Val::Px(select_button_size_style.border_radius),
+                bottom_right: Val::Px(select_button_size_style.border_radius),
+            },
+            SelectedValue(self.selected_value.clone().unwrap_or("Select".to_string())),
             BorderColor::default(),
             Children::spawn(Spawn((
                 Text::new(self.selected_value.clone().unwrap_or("Select".to_string())),
                 TextFont {
-                    font_size: 14.,
+                    font_size: font_size,
                     ..Default::default()
                 },
             ))),
@@ -224,11 +270,20 @@ impl SelectBuilder {
 
         let select_content_bundle = (
             Node {
-                display: Display::Flex,
+                display: Display::None,
                 flex_direction: FlexDirection::Column,
+                border: UiRect::all(Val::Px(2.0)),
                 width: Val::Px(button_width),
+                height: Val::Auto,
                 ..default()
             },
+            BorderRadius {
+                top_left: Val::Px(select_button_size_style.border_radius),
+                top_right: Val::Px(select_button_size_style.border_radius),
+                bottom_left: Val::Px(select_button_size_style.border_radius),
+                bottom_right: Val::Px(select_button_size_style.border_radius),
+            },
+            SelectHasPopup(false),
             CoreSelectContent {
                 on_change: self.on_change,
             },
@@ -237,7 +292,7 @@ impl SelectBuilder {
         let child_bundles = self
             .children
             .into_iter()
-            .map(|builder| builder.build())
+            .map(|builder| builder.size(self.size.unwrap_or_default()).build())
             .collect::<Vec<_>>();
 
         (

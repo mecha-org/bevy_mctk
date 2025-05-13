@@ -44,10 +44,28 @@ fn set_theme(id: ThemeId) -> impl FnMut(ResMut<ThemeManager>) + Clone {
     }
 }
 
+fn run_on_select_item_selected(
+    In(selected_entity): In<Entity>,
+    q_select_content: Query<&Children>,
+    select_query: Query<(&ChildOf, &SelectedValue)>,
+    mut commands: Commands,
+) {
+    if let Ok((child_of, selected_value)) = select_query.get(selected_entity) {
+        let group_children = q_select_content.get(child_of.parent()).unwrap();
+        for select_item_child in group_children.iter() {
+            if let Ok((_, value)) = select_query.get(select_item_child) {
+                commands
+                    .entity(select_item_child)
+                    .insert(Checked(value.0 == selected_value.0));
+            }
+        }
+    }
+}
+
 fn setup_view_root(mut commands: Commands) {
     commands.spawn(Camera2d);
 
-    let on_toogle_theme_mode = commands.register_system(toggle_mode);
+    let on_toggle_theme_mode = commands.register_system(toggle_mode);
 
     // Example theme change handlers (register your real handlers)
     let on_default_theme = commands.register_system(set_theme(ThemeId("default".into())));
@@ -71,8 +89,13 @@ fn setup_view_root(mut commands: Commands) {
             .value("Coffee".to_string()),
     ];
 
-    let (group_bundle, select_root, select_content, children) =
-        StyledSelect::builder().children(options).build();
+    // default medium size
+    let (parent_bundle, select_trigger_bundle, select_content_bundle, child_bundles) =
+        StyledSelect::builder()
+            .children(options.clone())
+            .size(SelectButtonSize::Large)
+            // .on_change(commands.register_system(run_on_select_item_selected))
+            .build();
 
     commands
         .spawn((
@@ -175,7 +198,7 @@ fn setup_view_root(mut commands: Commands) {
                 Children::spawn(Spawn((
                     StyledButton::builder()
                         .icon("theme_mode_toggle")
-                        .on_click(on_toogle_theme_mode)
+                        .on_click(on_toggle_theme_mode)
                         .variant(ButtonVariant::Secondary)
                         .build(),
                     ThemeToggleButton,
@@ -200,13 +223,16 @@ fn setup_view_root(mut commands: Commands) {
                     height: Val::Px(60.),
                     ..default()
                 },))
-                .insert(group_bundle)
-                .insert(select_root)
-                .insert(select_content)
-                .with_children(|group_parent| {
-                    for child in children {
-                        group_parent.spawn(child);
-                    }
+                .insert(parent_bundle)
+                .insert(select_trigger_bundle)
+                .with_children(|parent| {
+                    parent
+                        .spawn(select_content_bundle)
+                        .with_children(|content| {
+                            for child in child_bundles {
+                                content.spawn(child);
+                            }
+                        });
                 });
         });
 }
