@@ -6,7 +6,7 @@ use bevy_core_widgets::{CoreSlider, hover::Hovering};
 
 use crate::themes::ThemeManager;
 
-use super::{StyledSlider, components::AccessibleName};
+use super::{SliderSize, StyledSlider, components::AccessibleName};
 
 #[derive(Component)]
 pub struct Track;
@@ -23,6 +23,8 @@ pub struct SliderBuilder {
     track_color: Option<Color>,
     thumb_color: Option<Color>,
     hovered_thumb_color: Option<Color>,
+    size: Option<SliderSize>,
+    disabled: bool,
 }
 
 impl SliderBuilder {
@@ -61,6 +63,15 @@ impl SliderBuilder {
         self
     }
 
+    pub fn size(mut self, size: SliderSize) -> Self {
+        self.size = Some(size);
+        self
+    }
+    pub fn disabled(mut self, disabled: bool) -> Self {
+        self.disabled = disabled;
+        self
+    }
+
     pub fn build(self) -> impl Bundle {
         let theme_manager = ThemeManager::default();
         let slider_styles = theme_manager.styles.slider.clone();
@@ -72,8 +83,6 @@ impl SliderBuilder {
                 align_self: AlignSelf::Stretch,
                 align_items: AlignItems::Stretch,
                 justify_items: JustifyItems::Center,
-                height: Val::Px(12.0),
-                width: Val::Percent(100.0),
                 ..default()
             },
             Name::new("Slider"),
@@ -88,6 +97,8 @@ impl SliderBuilder {
                 track_color: self.track_color,
                 thumb_color: self.thumb_color,
                 hovered_thumb_color: self.hovered_thumb_color,
+                size: self.size,
+                disabled: self.disabled,
             },
             CoreSlider {
                 min: self.min,
@@ -103,6 +114,7 @@ impl SliderBuilder {
                 Spawn((
                     Node {
                         height: Val::Px(6.0),
+                        width: Val::Percent(100.0),
                         ..default()
                     },
                     Track,
