@@ -176,13 +176,92 @@ fn setup_view_root(mut commands: Commands) {
                     display: Display::Flex,
                     flex_direction: FlexDirection::Column,
                     justify_content: JustifyContent::Start,
-                    align_items: AlignItems::Center,
-                    align_content: AlignContent::Center,
-                    width: Val::Px(200.), // change this as required
+                    align_items: AlignItems::Stretch,
+                    align_content: AlignContent::Stretch,
                     padding: UiRect::axes(Val::Px(12.0), Val::Px(0.0)),
                     ..default()
                 },
-                Children::spawn((Spawn(StyledProgress::builder().value(80.).build()),)),
+                Children::spawn((Spawn(StyledProgress::builder().value(50.).build()),)),
+            )),
+            Spawn(
+                StyledText::builder()
+                    .content("Sizes")
+                    .font_size(24.0)
+                    .build(),
+            ),
+            Spawn((
+                Node {
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Column,
+                    justify_content: JustifyContent::Stretch,
+                    align_items: AlignItems::Stretch,
+                    align_content: AlignContent::Stretch,
+                    padding: UiRect::axes(Val::Px(12.0), Val::Px(12.0)),
+                    column_gap: Val::Px(10.0),
+                    ..default()
+                },
+                Children::spawn((
+                    Spawn(
+                        StyledText::builder()
+                            .content("XSmall")
+                            .font_size(14.0)
+                            .build(),
+                    ),
+                    Spawn(
+                        StyledProgress::builder()
+                            .value(50.)
+                            .size(ProgressSize::XSmall)
+                            .build(),
+                    ),
+                    Spawn(
+                        StyledText::builder()
+                            .content("Small")
+                            .font_size(14.0)
+                            .build(),
+                    ),
+                    Spawn(
+                        StyledProgress::builder()
+                            .value(50.)
+                            .size(ProgressSize::Small)
+                            .build(),
+                    ),
+                    Spawn(
+                        StyledText::builder()
+                            .content("Medium")
+                            .font_size(14.0)
+                            .build(),
+                    ),
+                    Spawn(
+                        StyledProgress::builder()
+                            .value(50.)
+                            .size(ProgressSize::Medium)
+                            .build(),
+                    ),
+                    Spawn(
+                        StyledText::builder()
+                            .content("Large")
+                            .font_size(14.0)
+                            .build(),
+                    ),
+                    Spawn(
+                        StyledProgress::builder()
+                            .value(50.)
+                            .size(ProgressSize::Large)
+                            .build(),
+                    ),
+                    Spawn(
+                        StyledText::builder()
+                            .content("XLarge")
+                            .font_size(14.0)
+                            .build(),
+                    ),
+                    Spawn(
+                        StyledProgress::builder()
+                            .value(50.)
+                            .size(ProgressSize::XLarge)
+                            .build(),
+                    ),
+                )),
             )),
         )),
     ));
