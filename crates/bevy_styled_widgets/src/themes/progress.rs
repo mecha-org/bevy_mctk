@@ -15,3 +15,45 @@ impl ProgressStyle {
         }
     }
 }
+
+// Progress size properties
+#[derive(Debug, Clone)]
+pub struct ProgressSizeProperties {
+    pub min_width: f32,
+    pub min_height: f32,
+}
+
+// Collection of size variants
+#[derive(Debug, Clone)]
+pub struct ProgressSizeStyles {
+    pub xsmall: ProgressSizeProperties,
+    pub small: ProgressSizeProperties,
+    pub medium: ProgressSizeProperties,
+    pub large: ProgressSizeProperties,
+    pub xlarge: ProgressSizeProperties,
+}
+
+pub fn progress_sizes() -> ProgressSizeStyles {
+    ProgressSizeStyles {
+        xsmall: ProgressSizeProperties {
+            min_width: 56.0,
+            min_height: 12.0,
+        },
+        small: ProgressSizeProperties {
+            min_width: 80.0,
+            min_height: 12.0,
+        },
+        medium: ProgressSizeProperties {
+            min_width: 100.0,
+            min_height: 12.0,
+        },
+        large: ProgressSizeProperties {
+            min_width: 120.0,
+            min_height: 12.0,
+        },
+        xlarge: ProgressSizeProperties {
+            min_width: 144.0,
+            min_height: 12.0,
+        },
+    }
+}
