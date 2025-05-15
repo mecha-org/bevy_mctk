@@ -71,6 +71,9 @@ pub struct RadioButtonSizeProperties {
     pub inner_circle_top: f32,
     pub inner_circle_corner_radius: f32,
     pub caption_font_size: f32,
+    pub padding_horizontal: f32,
+    pub padding_vertical: f32,
+    pub column_gap: f32,
 }
 
 // Collection of size variants for Radio button
@@ -96,6 +99,9 @@ pub fn radio_button_sizes() -> RadioButtonSizeStyles {
             inner_circle_top: 2.0,
             inner_circle_corner_radius: 50.0,
             caption_font_size: 14.0,
+            padding_horizontal: 8.0,
+            padding_vertical: 4.0,
+            column_gap: 3.0,
         },
         small: RadioButtonSizeProperties {
             outer_border_width: 1.0,
@@ -108,6 +114,9 @@ pub fn radio_button_sizes() -> RadioButtonSizeStyles {
             inner_circle_top: 2.0,
             inner_circle_corner_radius: 50.0,
             caption_font_size: 14.0,
+            padding_horizontal: 8.0,
+            padding_vertical: 4.0,
+            column_gap: 3.0,
         },
         medium: RadioButtonSizeProperties {
             outer_border_width: 1.0,
@@ -120,6 +129,9 @@ pub fn radio_button_sizes() -> RadioButtonSizeStyles {
             inner_circle_top: 2.0,
             inner_circle_corner_radius: 50.0,
             caption_font_size: 14.0,
+            padding_horizontal: 10.0,
+            padding_vertical: 6.0,
+            column_gap: 4.0,
         },
         large: RadioButtonSizeProperties {
             outer_border_width: 1.0,
@@ -132,6 +144,9 @@ pub fn radio_button_sizes() -> RadioButtonSizeStyles {
             inner_circle_top: 2.0,
             inner_circle_corner_radius: 50.0,
             caption_font_size: 14.0,
+            padding_horizontal: 12.0,
+            padding_vertical: 8.0,
+            column_gap: 5.0,
         },
         xlarge: RadioButtonSizeProperties {
             outer_border_width: 1.0,
@@ -144,6 +159,9 @@ pub fn radio_button_sizes() -> RadioButtonSizeStyles {
             inner_circle_top: 2.0,
             inner_circle_corner_radius: 50.0,
             caption_font_size: 14.0,
+            padding_horizontal: 16.0,
+            padding_vertical: 10.0,
+            column_gap: 5.0,
         },
     }
 }
