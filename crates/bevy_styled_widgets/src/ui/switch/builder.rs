@@ -2,7 +2,7 @@ use bevy::{
     ecs::system::SystemId, input_focus::tab_navigation::TabIndex, prelude::*,
     window::SystemCursorIcon, winit::cursor::CursorIcon,
 };
-use bevy_core_widgets::{Checked, InteractionDisabled, hover::Hovering};
+use bevy_core_widgets::{Checked, hover::Hovering};
 
 use bevy_additional_core_widgets::CoreSwitch;
 
