@@ -5,7 +5,7 @@ use bevy::{
 use bevy_core_widgets::{CoreButton, hover::Hovering};
 
 use super::{
-    ButtonSize,
+    ButtonSize, StyledButtonText,
     components::{AccessibleName, ButtonVariant, StyledButton},
 };
 
@@ -22,6 +22,7 @@ pub struct ButtonBuilder {
     icon: Option<String>,
     size: Option<ButtonSize>,
     disabled: bool,
+    font: Option<Handle<Font>>,
 }
 
 impl ButtonBuilder {
@@ -80,6 +81,11 @@ impl ButtonBuilder {
         self
     }
 
+    pub fn font(mut self, font: Handle<Font>) -> Self {
+        self.font = Some(font);
+        self
+    }
+
     pub fn build(self) -> impl Bundle {
         (
             Node {
@@ -98,6 +104,7 @@ impl ButtonBuilder {
             StyledButton {
                 text: self.text.clone(),
                 icon: self.icon.clone(),
+                font: self.font,
                 variant: self.variant,
                 size: self.size,
                 on_click: self.on_click,
@@ -113,6 +120,11 @@ impl ButtonBuilder {
             },
             AccessibleName(self.text.clone().unwrap_or_else(|| "Button".to_string())),
             TabIndex(0),
+            Children::spawn(Spawn((
+                Text::new(""),
+                TextFont::default(),
+                StyledButtonText,
+            ))),
         )
     }
 }

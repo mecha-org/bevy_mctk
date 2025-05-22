@@ -1,14 +1,10 @@
-use bevy::{
-    input_focus::tab_navigation::TabGroup,
-    prelude::*,
-    winit::WinitSettings,
-};
+use bevy::{input_focus::tab_navigation::TabGroup, prelude::*, winit::WinitSettings};
 use bevy_core_widgets::{Checked, InteractionDisabled};
 use bevy_styled_widgets::prelude::*;
 
 fn main() {
     App::new()
-        .add_plugins((DefaultPlugins, StyledWidgetsPligin))
+        .add_plugins((DefaultPlugins, StyledWidgetsPlugin))
         .insert_resource(ThemeManager::default())
         .insert_resource(WinitSettings::desktop_app())
         .add_systems(Startup, setup_view_root)
@@ -44,7 +40,6 @@ fn run_on_radio_selected(
     mut commands: Commands,
 ) {
     if let Ok((child_of, radio_value)) = query.get(selected_entity) {
-
         match radio_value.0.as_str() {
             "dark" => theme_manager.set_theme_mode(ThemeMode::Dark),
             "light" => theme_manager.set_theme_mode(ThemeMode::Light),

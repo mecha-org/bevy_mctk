@@ -1278,7 +1278,6 @@ dependencies = [
  "accesskit",
  "bevy",
  "bevy_additional_core_widgets",
- "bevy_asset_loader",
  "bevy_core_widgets",
  "bevy_cosmic_edit",
  "serde",
