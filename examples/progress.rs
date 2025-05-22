@@ -3,7 +3,7 @@ use bevy_styled_widgets::prelude::*;
 
 fn main() {
     App::new()
-        .add_plugins((DefaultPlugins, StyledWidgetsPligin))
+        .add_plugins((DefaultPlugins, StyledWidgetsPlugin))
         .insert_resource(ThemeManager::default())
         .insert_resource(WinitSettings::desktop_app())
         .add_systems(Startup, setup_view_root)
