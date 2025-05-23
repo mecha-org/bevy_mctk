@@ -71,3 +71,10 @@ fn on_set_label(mut world: DeferredWorld, context: HookContext) {
         accessibility.set_label(name.as_str());
     }
 }
+
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RadioButtonDirection {
+    #[default]
+    Vertical,
+    Horizontal,
+}

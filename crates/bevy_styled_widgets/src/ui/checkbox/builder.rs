@@ -2,7 +2,7 @@ use bevy::{
     ecs::system::SystemId, input_focus::tab_navigation::TabIndex, prelude::*,
     window::SystemCursorIcon, winit::cursor::CursorIcon,
 };
-use bevy_core_widgets::{Checked, CoreCheckbox, InteractionDisabled, hover::Hovering};
+use bevy_core_widgets::{Checked, CoreCheckbox, hover::Hovering};
 
 use super::{
     CheckboxSize,

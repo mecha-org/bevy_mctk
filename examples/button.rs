@@ -1,12 +1,38 @@
 use bevy::{input_focus::tab_navigation::TabGroup, prelude::*, winit::WinitSettings};
+use bevy_asset_loader::prelude::*;
+use bevy_asset_loader::{
+    loading_state::{LoadingState, LoadingStateAppExt, config::ConfigureLoadingState},
+    standard_dynamic_asset::StandardDynamicAssetCollection,
+};
 use bevy_styled_widgets::prelude::*;
+
+#[derive(AssetCollection, Resource)]
+#[allow(dead_code)]
+pub struct FontAssets {
+    #[asset(key = "fonts.icons")]
+    pub font_icons: Handle<Font>,
+}
+
+#[derive(Default, Clone, Eq, PartialEq, Debug, Hash, States)]
+pub enum AssetsLoadingState {
+    #[default]
+    Loading,
+    Loaded,
+}
 
 fn main() {
     App::new()
-        .add_plugins((DefaultPlugins, StyledWidgetsPligin))
+        .add_plugins((DefaultPlugins, StyledWidgetsPlugin))
         .insert_resource(ThemeManager::default())
         .insert_resource(WinitSettings::desktop_app())
-        .add_systems(Startup, setup_view_root)
+        .init_state::<AssetsLoadingState>()
+        .add_loading_state(
+            LoadingState::new(AssetsLoadingState::Loading)
+                .continue_to_state(AssetsLoadingState::Loaded)
+                .with_dynamic_assets_file::<StandardDynamicAssetCollection>("examples/settings.ron")
+                .load_collection::<FontAssets>(),
+        )
+        .add_systems(OnEnter(AssetsLoadingState::Loaded), setup_view_root)
         .add_systems(Update, update_root_background)
         .run();
 }
@@ -43,7 +69,8 @@ fn set_theme(id: ThemeId) -> impl FnMut(ResMut<ThemeManager>) + Clone {
     }
 }
 
-fn setup_view_root(mut commands: Commands) {
+fn setup_view_root(mut commands: Commands, font_assets: Res<FontAssets>) {
+    let FontAssets { font_icons, .. } = font_assets.into_inner();
     commands.spawn(Camera2d);
 
     let on_toogle_theme_mode = commands.register_system(toggle_mode);
@@ -158,6 +185,7 @@ fn setup_view_root(mut commands: Commands) {
                 Children::spawn((Spawn((
                     StyledButton::builder()
                         .icon("theme_mode_toggle")
+                        .font(font_icons.clone())
                         .on_click(on_toogle_theme_mode)
                         .variant(ButtonVariant::Secondary)
                         .build(),

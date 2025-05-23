@@ -4,7 +4,7 @@ use bevy_styled_widgets::prelude::*;
 
 fn main() {
     App::new()
-        .add_plugins((DefaultPlugins, StyledWidgetsPligin))
+        .add_plugins((DefaultPlugins, StyledWidgetsPlugin))
         .insert_resource(ThemeManager::default())
         .insert_resource(WinitSettings::desktop_app())
         .add_systems(Startup, setup_view_root)
@@ -61,7 +61,7 @@ fn update_light_dark_theme(
     mut commands: Commands,
     mut theme_manager: ResMut<ThemeManager>,
 ) {
-    for (mut styled_checkbox, entity) in &mut query {
+    for (styled_checkbox, entity) in &mut query {
         if styled_checkbox.disabled {
             commands.entity(entity).insert(InteractionDisabled);
             return;
@@ -76,7 +76,7 @@ fn update_light_dark_theme(
     }
 }
 
-fn setup_view_root(mut commands: Commands, theme: Res<ThemeManager>) {
+fn setup_view_root(mut commands: Commands) {
     commands.spawn(Camera2d);
 
     let on_toogle_theme_mode = commands.register_system(update_light_dark_theme);

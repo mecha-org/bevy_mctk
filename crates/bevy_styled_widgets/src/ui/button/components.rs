@@ -11,6 +11,7 @@ pub struct StyledButton {
     pub size: Option<ButtonSize>,
     pub text: Option<String>,
     pub icon: Option<String>,
+    pub font: Option<Handle<Font>>,
     #[reflect(ignore)]
     pub on_click: Option<SystemId>,
     pub background_color: Option<Color>,

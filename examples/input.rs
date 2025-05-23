@@ -13,7 +13,7 @@ fn main() {
     App::new()
         .add_plugins((
             DefaultPlugins,
-            StyledWidgetsPligin,
+            StyledWidgetsPlugin,
             CosmicEditPlugin { font_config },
         ))
         .insert_resource(ThemeManager::default())
