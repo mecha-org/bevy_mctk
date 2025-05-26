@@ -79,17 +79,10 @@ fn setup_view_root(mut commands: Commands) {
 
     let select_on_change_system_id = commands.register_system(run_on_select_changed);
 
-    // TODO: try with/without key/value
     let options_l = vec![
-        StyledSelectItem::builder()
-            // .label("Option 1".to_string())
-            .value("Option 1".to_string()),
-        StyledSelectItem::builder()
-            // .label("Option 2".to_string())
-            .value("Option 2".to_string()),
-        StyledSelectItem::builder()
-            // .label("Option 3".to_string())
-            .value("Option 3".to_string()),
+        StyledSelectItem::builder().value("Option 1".to_string()),
+        StyledSelectItem::builder().value("Option 2".to_string()),
+        StyledSelectItem::builder().value("Option 3".to_string()),
     ];
 
     let options = vec![

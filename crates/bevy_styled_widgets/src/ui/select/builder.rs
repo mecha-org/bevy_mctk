@@ -67,22 +67,22 @@ impl SelectBuilder {
 
     pub fn build(self) -> (impl Bundle, impl Bundle, impl Bundle, Vec<impl Bundle>) {
         let theme_manager = ThemeManager::default();
-        let select_button_size_styles = theme_manager.styles.select_sizes.clone();
-        let select_button_styles = theme_manager.styles.select_styles.clone();
+        let select_size_styles = theme_manager.styles.select_sizes.clone();
+        let select_styles = theme_manager.styles.select_styles.clone();
 
         // Update size styles
-        let select_button_size_style = match self.size.unwrap_or_default() {
-            SelectButtonSize::XSmall => select_button_size_styles.xsmall,
-            SelectButtonSize::Small => select_button_size_styles.small,
-            SelectButtonSize::Medium => select_button_size_styles.medium,
-            SelectButtonSize::Large => select_button_size_styles.large,
-            SelectButtonSize::XLarge => select_button_size_styles.xlarge,
+        let select_size_style = match self.size.unwrap_or_default() {
+            SelectButtonSize::XSmall => select_size_styles.xsmall,
+            SelectButtonSize::Small => select_size_styles.small,
+            SelectButtonSize::Medium => select_size_styles.medium,
+            SelectButtonSize::Large => select_size_styles.large,
+            SelectButtonSize::XLarge => select_size_styles.xlarge,
         };
 
-        let button_width = select_button_size_style.min_width;
-        let button_height = select_button_size_style.min_height;
+        let button_width = select_size_style.min_width;
+        let button_height = select_size_style.min_height;
 
-        let font_size = select_button_size_style.font_size;
+        let font_size = select_size_style.font_size;
 
         // Root: SelectWidget
         let root = (
@@ -118,17 +118,17 @@ impl SelectBuilder {
                 on_change: self.on_change,
                 size: self.size,
             },
-            BackgroundColor(select_button_styles.background.into()),
+            BackgroundColor(select_styles.background.into()),
             Name::new(self.selected_value.clone().unwrap_or("Select".to_string())), // Name::new("Select"),
             Hovering::default(),
             CursorIcon::System(SystemCursorIcon::Pointer),
             AccessibilityNode(Accessible::new(Role::Button)),
             TabIndex(0),
             BorderRadius {
-                top_left: Val::Px(select_button_size_style.border_radius),
-                top_right: Val::Px(select_button_size_style.border_radius),
-                bottom_left: Val::Px(select_button_size_style.border_radius),
-                bottom_right: Val::Px(select_button_size_style.border_radius),
+                top_left: Val::Px(select_size_style.border_radius),
+                top_right: Val::Px(select_size_style.border_radius),
+                bottom_left: Val::Px(select_size_style.border_radius),
+                bottom_right: Val::Px(select_size_style.border_radius),
             },
             SelectedValue(self.selected_value.clone().unwrap_or("Select".to_string())),
             CoreSelectTrigger {
@@ -155,12 +155,12 @@ impl SelectBuilder {
                 height: Val::Auto,
                 ..default()
             },
-            BackgroundColor(select_button_styles.popover_background.into()),
+            BackgroundColor(select_styles.popover_background.into()),
             BorderRadius {
-                top_left: Val::Px(select_button_size_style.border_radius),
-                top_right: Val::Px(select_button_size_style.border_radius),
-                bottom_left: Val::Px(select_button_size_style.border_radius),
-                bottom_right: Val::Px(select_button_size_style.border_radius),
+                top_left: Val::Px(select_size_style.border_radius),
+                top_right: Val::Px(select_size_style.border_radius),
+                bottom_left: Val::Px(select_size_style.border_radius),
+                bottom_right: Val::Px(select_size_style.border_radius),
             },
             CoreSelectContent {
                 on_change: self.on_change,
@@ -224,17 +224,17 @@ impl SelectItemBuilder {
 
     pub fn build(self) -> impl Bundle {
         let theme_manager = ThemeManager::default();
-        let select_button_size_styles = theme_manager.styles.select_sizes.clone();
+        let select_size_styles = theme_manager.styles.select_sizes.clone();
         // Update size styles
-        let select_button_size_style = match self.size.unwrap_or_default() {
-            SelectButtonSize::XSmall => select_button_size_styles.xsmall,
-            SelectButtonSize::Small => select_button_size_styles.small,
-            SelectButtonSize::Medium => select_button_size_styles.medium,
-            SelectButtonSize::Large => select_button_size_styles.large,
-            SelectButtonSize::XLarge => select_button_size_styles.xlarge,
+        let select_size_style = match self.size.unwrap_or_default() {
+            SelectButtonSize::XSmall => select_size_styles.xsmall,
+            SelectButtonSize::Small => select_size_styles.small,
+            SelectButtonSize::Medium => select_size_styles.medium,
+            SelectButtonSize::Large => select_size_styles.large,
+            SelectButtonSize::XLarge => select_size_styles.xlarge,
         };
-        let height = select_button_size_style.min_height;
-        let font_size = select_button_size_style.font_size;
+        let height = select_size_style.min_height;
+        let font_size = select_size_style.font_size;
 
         // select content- dropdown
         let child_nodes = Children::spawn((

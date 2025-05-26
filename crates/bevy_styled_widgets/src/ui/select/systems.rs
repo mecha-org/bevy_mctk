@@ -46,11 +46,11 @@ pub fn open_select_content(
 ) {
     for (widget_entity, DropdownOpen(is_open)) in &query_open_widgets {
         // Find the root SelectWidget this DropdownOpen belongs to
-        for (children, root_entity) in &root_query {
+        for (children, _) in &root_query {
             if children.contains(&widget_entity) {
                 // Update its dropdown container
                 for &child in children {
-                    if let Ok((dropdown_entity, mut node)) = dropdown_query.get_mut(child) {
+                    if let Ok((_, mut node)) = dropdown_query.get_mut(child) {
                         node.display = if *is_open {
                             Display::Flex
                         } else {
@@ -206,20 +206,20 @@ pub fn update_select_visuals(
         if !active_roots.contains(&trigger_entity) {
             continue;
         }
-        let select_button_size_styles = theme_manager.styles.select_sizes.clone();
-        let select_button_size_style = match select_button.size.unwrap_or_default() {
-            SelectButtonSize::XSmall => select_button_size_styles.xsmall,
-            SelectButtonSize::Small => select_button_size_styles.small,
-            SelectButtonSize::Medium => select_button_size_styles.medium,
-            SelectButtonSize::Large => select_button_size_styles.large,
-            SelectButtonSize::XLarge => select_button_size_styles.xlarge,
+        let select_size_styles = theme_manager.styles.select_sizes.clone();
+        let select_size_style = match select_button.size.unwrap_or_default() {
+            SelectButtonSize::XSmall => select_size_styles.xsmall,
+            SelectButtonSize::Small => select_size_styles.small,
+            SelectButtonSize::Medium => select_size_styles.medium,
+            SelectButtonSize::Large => select_size_styles.large,
+            SelectButtonSize::XLarge => select_size_styles.xlarge,
         };
 
-        node.border = UiRect::all(Val::Px(select_button_size_style.border_width));
-        border_radius.top_left = Val::Px(select_button_size_style.border_radius);
-        border_radius.top_right = Val::Px(select_button_size_style.border_radius);
-        border_radius.bottom_left = Val::Px(select_button_size_style.border_radius);
-        border_radius.bottom_right = Val::Px(select_button_size_style.border_radius);
+        node.border = UiRect::all(Val::Px(select_size_style.border_width));
+        border_radius.top_left = Val::Px(select_size_style.border_radius);
+        border_radius.top_right = Val::Px(select_size_style.border_radius);
+        border_radius.bottom_left = Val::Px(select_size_style.border_radius);
+        border_radius.bottom_right = Val::Px(select_size_style.border_radius);
 
         if is_disabled {
             *bg_color = BackgroundColor(select_styles.disabled_background);
@@ -259,24 +259,24 @@ pub fn update_select_visuals(
     for (entity, mut node, mut bg_color, mut border_color, mut border_radius, select) in
         query_set.p2().iter_mut()
     {
-        let select_button_size_styles = theme_manager.styles.select_sizes.clone();
-        let select_button_size_style = match select.size.unwrap_or_default() {
-            SelectButtonSize::XSmall => select_button_size_styles.xsmall,
-            SelectButtonSize::Small => select_button_size_styles.small,
-            SelectButtonSize::Medium => select_button_size_styles.medium,
-            SelectButtonSize::Large => select_button_size_styles.large,
-            SelectButtonSize::XLarge => select_button_size_styles.xlarge,
+        let select_size_styles = theme_manager.styles.select_sizes.clone();
+        let select_size_style = match select.size.unwrap_or_default() {
+            SelectButtonSize::XSmall => select_size_styles.xsmall,
+            SelectButtonSize::Small => select_size_styles.small,
+            SelectButtonSize::Medium => select_size_styles.medium,
+            SelectButtonSize::Large => select_size_styles.large,
+            SelectButtonSize::XLarge => select_size_styles.xlarge,
         };
 
         // Update the background based on a new field (for example, content_background)
         *bg_color = BackgroundColor(select_styles.popover_background);
 
-        node.border = UiRect::all(Val::Px(select_button_size_style.border_width));
+        node.border = UiRect::all(Val::Px(select_size_style.border_width));
         *border_color = BorderColor(select_styles.popover_border_color);
 
-        border_radius.top_left = Val::Px(select_button_size_style.border_radius);
-        border_radius.top_right = Val::Px(select_button_size_style.border_radius);
-        border_radius.bottom_left = Val::Px(select_button_size_style.border_radius);
-        border_radius.bottom_right = Val::Px(select_button_size_style.border_radius);
+        border_radius.top_left = Val::Px(select_size_style.border_radius);
+        border_radius.top_right = Val::Px(select_size_style.border_radius);
+        border_radius.bottom_left = Val::Px(select_size_style.border_radius);
+        border_radius.bottom_right = Val::Px(select_size_style.border_radius);
     }
 }
