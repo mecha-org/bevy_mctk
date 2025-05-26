@@ -1,13 +1,38 @@
 use bevy::{input_focus::tab_navigation::TabGroup, prelude::*, winit::WinitSettings};
 use bevy_additional_core_widgets::IsSelected;
+use bevy_asset_loader::prelude::*;
+use bevy_asset_loader::{
+    loading_state::{LoadingState, LoadingStateAppExt, config::ConfigureLoadingState},
+    standard_dynamic_asset::StandardDynamicAssetCollection,
+};
 use bevy_styled_widgets::prelude::*;
 
+#[derive(AssetCollection, Resource)]
+#[allow(dead_code)]
+pub struct FontAssets {
+    #[asset(key = "fonts.icons")]
+    pub font_icons: Handle<Font>,
+}
+
+#[derive(Default, Clone, Eq, PartialEq, Debug, Hash, States)]
+pub enum AssetsLoadingState {
+    #[default]
+    Loading,
+    Loaded,
+}
 fn main() {
     App::new()
         .add_plugins((DefaultPlugins, StyledWidgetsPlugin))
         .insert_resource(ThemeManager::default())
         .insert_resource(WinitSettings::desktop_app())
-        .add_systems(Startup, setup_view_root)
+        .init_state::<AssetsLoadingState>()
+        .add_loading_state(
+            LoadingState::new(AssetsLoadingState::Loading)
+                .continue_to_state(AssetsLoadingState::Loaded)
+                .with_dynamic_assets_file::<StandardDynamicAssetCollection>("examples/settings.ron")
+                .load_collection::<FontAssets>(),
+        )
+        .add_systems(OnEnter(AssetsLoadingState::Loaded), setup_view_root)
         .add_systems(Update, update_root_background)
         .run();
 }
@@ -62,8 +87,9 @@ fn run_on_select_changed(
     }
 }
 
-fn setup_view_root(mut commands: Commands) {
+fn setup_view_root(mut commands: Commands, font_assets: Res<FontAssets>) {
     commands.spawn(Camera2d);
+    let FontAssets { font_icons, .. } = font_assets.into_inner();
 
     let on_toggle_theme_mode = commands.register_system(toggle_mode);
 
@@ -207,14 +233,15 @@ fn setup_view_root(mut commands: Commands) {
                     padding: UiRect::axes(Val::Px(12.0), Val::Px(0.0)),
                     ..default()
                 },
-                Children::spawn(Spawn((
+                Children::spawn((Spawn((
                     StyledButton::builder()
                         .icon("theme_mode_toggle")
+                        .font(font_icons.clone())
                         .on_click(on_toggle_theme_mode)
                         .variant(ButtonVariant::Secondary)
                         .build(),
                     ThemeToggleButton,
-                ))),
+                )),)),
             ));
 
             parent.spawn(
