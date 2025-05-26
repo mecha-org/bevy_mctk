@@ -1,6 +1,5 @@
 use bevy::{input_focus::tab_navigation::TabGroup, prelude::*, winit::WinitSettings};
 use bevy_additional_core_widgets::IsSelected;
-use bevy_core_widgets::Checked;
 use bevy_styled_widgets::prelude::*;
 
 fn main() {
@@ -57,7 +56,7 @@ fn run_on_select_changed(
             if let Ok((_, value)) = select_query.get(select_item_child) {
                 commands
                     .entity(select_item_child)
-                    .insert(Checked(value.0 == selected_value.0));
+                    .insert(IsSelected(value.0 == selected_value.0));
             }
         }
     }
@@ -83,13 +82,13 @@ fn setup_view_root(mut commands: Commands) {
     // TODO: try with/without key/value
     let options_l = vec![
         StyledSelectItem::builder()
-            .label("Option 1".to_string())
+            // .label("Option 1".to_string())
             .value("Option 1".to_string()),
         StyledSelectItem::builder()
-            .label("Option 2".to_string())
+            // .label("Option 2".to_string())
             .value("Option 2".to_string()),
         StyledSelectItem::builder()
-            .label("Option 3".to_string())
+            // .label("Option 3".to_string())
             .value("Option 3".to_string()),
     ];
 
@@ -114,7 +113,7 @@ fn setup_view_root(mut commands: Commands) {
     let (parent_bundle_l, select_trigger_bundle_l, select_content_bundle_l, child_bundles_l) =
         StyledSelect::builder()
             .children(options_l.clone())
-            .size(SelectButtonSize::XLarge)
+            .size(SelectButtonSize::Large)
             .build();
 
     commands
@@ -285,7 +284,4 @@ fn setup_view_root(mut commands: Commands) {
                         });
                 });
         });
-
-    // understand spawning diff
-    // start from query
 }

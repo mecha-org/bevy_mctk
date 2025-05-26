@@ -3,12 +3,11 @@ use bevy::prelude::*;
 use super::ThemeColors;
 
 #[derive(Debug, Clone)]
-pub struct SelectButtonStyles {
-    // Colors
+pub struct SelectStyles {
     // trigger
-    pub button_background: Color,
-    pub button_text_color: Color,
-    pub button_border_color: Color,
+    pub background: Color,
+    pub text_color: Color,
+    pub border_color: Color,
 
     // items
     pub popover_background: Color,
@@ -24,12 +23,12 @@ pub struct SelectButtonStyles {
     pub disabled_border_color: Color,
 }
 
-impl SelectButtonStyles {
+impl SelectStyles {
     pub fn from_colors(colors: ThemeColors) -> Self {
         Self {
-            button_background: colors.primary,
-            button_text_color: colors.primary_foreground,
-            button_border_color: colors.border,
+            background: colors.primary,
+            text_color: colors.primary_foreground,
+            border_color: colors.border,
 
             popover_background: colors.primary,
             popover_border_color: colors.border,

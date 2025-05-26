@@ -18,25 +18,11 @@ use accesskit::{Node as Accessible, Role};
 #[derive(Component, Default)]
 pub struct SelectWidget; // marker
 
-#[derive(Component, Default)]
-pub struct SelectTrigger; // marker
+#[derive(Component)]
+pub struct StyledSelectText; // marker
 
 #[derive(Component)]
-pub struct DropdownContainer; // marker
-
-// marker
-#[derive(Component)]
-pub struct DropdownOption {
-    pub value: String,
-    pub disabled: bool,
-}
-
-// marker
-#[derive(Component)]
-pub struct SelectState {
-    pub selected: Option<String>,
-    pub is_open: bool,
-}
+pub struct StyledSelectOptionText; // marker
 
 #[derive(Default, Clone)]
 pub struct SelectBuilder {
@@ -82,7 +68,7 @@ impl SelectBuilder {
     pub fn build(self) -> (impl Bundle, impl Bundle, impl Bundle, Vec<impl Bundle>) {
         let theme_manager = ThemeManager::default();
         let select_button_size_styles = theme_manager.styles.select_sizes.clone();
-        let select_button_styles = theme_manager.styles.select_button_styles.clone();
+        let select_button_styles = theme_manager.styles.select_styles.clone();
 
         // Update size styles
         let select_button_size_style = match self.size.unwrap_or_default() {
@@ -99,7 +85,6 @@ impl SelectBuilder {
         let font_size = select_button_size_style.font_size;
 
         // Root: SelectWidget
-
         let root = (
             Node {
                 display: Display::Flex,
@@ -109,10 +94,6 @@ impl SelectBuilder {
                 ..default()
             },
             SelectWidget,
-            SelectState {
-                selected: self.selected_value.clone(),
-                is_open: false,
-            },
             AccessibilityNode(Accessible::new(Role::ComboBox)),
             DropdownOpen(false),
             AccessibleName(self.selected_value.clone().unwrap_or("Select".to_string())),
@@ -137,7 +118,7 @@ impl SelectBuilder {
                 on_change: self.on_change,
                 size: self.size,
             },
-            BackgroundColor(select_button_styles.button_background.into()),
+            BackgroundColor(select_button_styles.background.into()),
             Name::new(self.selected_value.clone().unwrap_or("Select".to_string())), // Name::new("Select"),
             Hovering::default(),
             CursorIcon::System(SystemCursorIcon::Pointer),
@@ -149,7 +130,6 @@ impl SelectBuilder {
                 bottom_left: Val::Px(select_button_size_style.border_radius),
                 bottom_right: Val::Px(select_button_size_style.border_radius),
             },
-            SelectTrigger,
             SelectedValue(self.selected_value.clone().unwrap_or("Select".to_string())),
             CoreSelectTrigger {
                 on_click: self.on_click,
@@ -161,6 +141,7 @@ impl SelectBuilder {
                     font_size: font_size,
                     ..Default::default()
                 },
+                StyledSelectText,
             ))),
         )),));
 
@@ -181,7 +162,6 @@ impl SelectBuilder {
                 bottom_left: Val::Px(select_button_size_style.border_radius),
                 bottom_right: Val::Px(select_button_size_style.border_radius),
             },
-            DropdownContainer, // marker
             CoreSelectContent {
                 on_change: self.on_change,
             },
@@ -197,9 +177,6 @@ impl SelectBuilder {
         (root, trigger, dropdown, child_bundles)
     }
 }
-
-#[derive(Component, Default)]
-pub struct SelectContent;
 
 #[derive(Component, Debug, Clone)]
 pub struct SelectedValue(pub String);
@@ -272,13 +249,14 @@ impl SelectItemBuilder {
                     height: Val::Px(height),
                     ..default()
                 },
-                Name::new(self.label.clone().unwrap_or("".to_string())),
+                Name::new(self.label.clone().unwrap_or(self.value.to_string())),
                 Children::spawn(Spawn((
                     Text::new(self.value.clone()),
                     TextFont {
                         font_size: font_size,
                         ..Default::default()
                     },
+                    StyledSelectOptionText,
                 ))),
             )),
             //
@@ -296,7 +274,6 @@ impl SelectItemBuilder {
                 ..default()
             },
             GlobalZIndex(99), // to ensure it appears above other UI elements
-            SelectContent,
             CoreSelectItem,
             Name::new("Select Item"),
             Hovering::default(),
@@ -309,10 +286,6 @@ impl SelectItemBuilder {
                 value: self.value.clone(),
             },
             SelectedValue(self.value.clone()),
-            DropdownOption {
-                value: self.value.clone(),
-                disabled: self.disabled,
-            },
             SelectedItem {
                 label: self.label.clone().unwrap_or(self.value.clone()),
                 value: self.value.clone(),

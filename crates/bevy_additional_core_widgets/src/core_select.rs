@@ -25,17 +25,12 @@ pub fn select_on_pointer_click(
     mut commands: Commands,
 ) {
     if let Ok((select_trigger, DropdownOpen(clicked), disabled)) = q_state.get(trigger.target()) {
-        let select_id = trigger.target();
-        focus.0 = Some(select_id);
-        focus_visible.0 = false;
-        trigger.propagate(false);
-
-        if disabled {
-            // If the select is disabled, do nothing
-            return;
-        }
-
         if !disabled {
+            let select_id = trigger.target();
+            focus.0 = Some(select_id);
+            focus_visible.0 = false;
+            trigger.propagate(false);
+
             let is_open = clicked;
             let new_clicked = !is_open;
 
@@ -65,51 +60,56 @@ fn select_content_on_button_click(
     let select_id = trigger.target();
 
     // Find the select item button that was clicked.
-    let Ok((_, child_of, _)) = q_select_item.get(select_id) else {
+    let Ok((_, child_of, disabled)) = q_select_item.get(select_id) else {
         return;
     };
 
-    // Find the parent CoreSelectContent of the clicked select item button.
-    let group_id = child_of.parent();
-    let Ok((CoreSelectContent { on_change }, group_children)) = q_group.get(group_id) else {
-        warn!("select item button clicked without a valid CoreSelectContent parent");
-        return;
-    };
+    if !disabled {
+        // If the select item button is not disabled, propagate the click event.
+        trigger.propagate(false);
 
-    // Set focus to group and hide focus ring
-    focus.0 = Some(group_id);
-    focus_visible.0 = false;
+        // Find the parent CoreSelectContent of the clicked select item button.
+        let group_id = child_of.parent();
+        let Ok((CoreSelectContent { on_change }, group_children)) = q_group.get(group_id) else {
+            warn!("select item button clicked without a valid CoreSelectContent parent");
+            return;
+        };
 
-    // Get all the select root children.
-    let select_children = group_children
-        .iter()
-        .filter_map(|child_id| match q_select_item.get(child_id) {
-            Ok((is_selected, _, false)) => Some((child_id, is_selected.0)),
-            Ok((_, _, true)) => None,
-            Err(_) => None,
-        })
-        .collect::<Vec<_>>();
+        // Set focus to group and hide focus ring
+        focus.0 = Some(group_id);
+        focus_visible.0 = false;
 
-    if select_children.is_empty() {
-        return; // No enabled select item buttons in the group
-    }
+        // Get all the select root children.
+        let select_children = group_children
+            .iter()
+            .filter_map(|child_id| match q_select_item.get(child_id) {
+                Ok((is_selected, _, false)) => Some((child_id, is_selected.0)),
+                Ok((_, _, true)) => None,
+                Err(_) => None,
+            })
+            .collect::<Vec<_>>();
 
-    trigger.propagate(false);
-    let current_select_item = select_children
-        .iter()
-        .find(|(_, is_selected)| *is_selected)
-        .map(|(id, _)| *id);
+        if select_children.is_empty() {
+            return; // No enabled select item buttons in the group
+        }
 
-    if current_select_item == Some(select_id) {
-        // If they clicked the currently selected item, do nothing
-        return;
-    }
+        trigger.propagate(false);
+        let current_select_item = select_children
+            .iter()
+            .find(|(_, is_selected)| *is_selected)
+            .map(|(id, _)| *id);
 
-    // Trigger the on_change event for the newly selected item
-    if let Some(on_change) = on_change {
-        commands.run_system_with(*on_change, select_id);
-    } else {
-        commands.trigger_targets(ValueChange(select_id), group_id);
+        if current_select_item == Some(select_id) {
+            // If they clicked the currently selected item, do nothing
+            return;
+        }
+
+        // Trigger the on_change event for the newly selected item
+        if let Some(on_change) = on_change {
+            commands.run_system_with(*on_change, select_id);
+        } else {
+            commands.trigger_targets(ValueChange(select_id), group_id);
+        }
     }
 }
 
@@ -219,14 +219,18 @@ fn select_item_on_pointer_click(
     mut commands: Commands,
 ) {
     if let Ok((is_selected, disabled)) = q_state.get(trigger.target()) {
-        let checkbox_id = trigger.target();
-        focus.0 = Some(checkbox_id);
-        focus_visible.0 = false;
-        trigger.propagate(false);
-        if is_selected.0 || disabled {
-            return;
+        if !disabled {
+            // If the select item button is not disabled, propagate the click event.
+            trigger.propagate(false);
+            let checkbox_id = trigger.target();
+            focus.0 = Some(checkbox_id);
+            focus_visible.0 = false;
+            trigger.propagate(false);
+            if is_selected.0 || disabled {
+                return;
+            }
+            commands.trigger_targets(ButtonClicked, trigger.target());
         }
-        commands.trigger_targets(ButtonClicked, trigger.target());
     }
 }
 

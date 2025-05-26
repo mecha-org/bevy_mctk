@@ -1,5 +1,3 @@
-use std::process::Child;
-
 use bevy::prelude::*;
 use bevy_additional_core_widgets::{
     CoreSelectContent, CoreSelectItem, CoreSelectTrigger, DropdownOpen, IsSelected,
@@ -9,14 +7,13 @@ use bevy_core_widgets::{InteractionDisabled, ValueChange, hover::Hovering};
 use crate::themes::ThemeManager;
 
 use super::{
-    DropdownContainer, SelectButtonSize, SelectContent, SelectState, SelectTrigger, SelectWidget,
-    StyledSelect, StyledSelectItem, builder::SelectedValue,
+    SelectButtonSize, SelectWidget, StyledSelect, StyledSelectItem, builder::SelectedValue,
 };
 
 pub fn on_select_triggered(
     mut trigger: Trigger<ValueChange<DropdownOpen>>,
     mut commands: Commands,
-    all_triggers: Query<(Entity, &StyledSelect), With<SelectTrigger>>,
+    all_triggers: Query<(Entity, &StyledSelect), With<CoreSelectTrigger>>,
 ) {
     trigger.propagate(false);
 
@@ -24,7 +21,7 @@ pub fn on_select_triggered(
 
     let clicked_entity = trigger.target();
 
-    // Close all other dropdowns and update the clicked one
+    // update the clicked one
     for (entity, styled_select) in &all_triggers {
         if styled_select.disabled {
             commands.entity(entity).insert(InteractionDisabled);
@@ -45,7 +42,7 @@ pub fn on_select_triggered(
 pub fn open_select_content(
     query_open_widgets: Query<(Entity, &DropdownOpen), Changed<DropdownOpen>>,
     root_query: Query<(&Children, Entity), With<SelectWidget>>,
-    mut dropdown_query: Query<(Entity, &mut Node), With<DropdownContainer>>,
+    mut dropdown_query: Query<(Entity, &mut Node), With<CoreSelectContent>>,
 ) {
     for (widget_entity, DropdownOpen(is_open)) in &query_open_widgets {
         // Find the root SelectWidget this DropdownOpen belongs to
@@ -70,8 +67,9 @@ pub fn on_select_item_selection(
     mut trigger: Trigger<ValueChange<Entity>>,
     q_select_widget: Query<(&Children, Entity), With<SelectWidget>>,
     q_select_content: Query<&Children, With<CoreSelectContent>>,
-    q_select_item: Query<(&ChildOf, &SelectedValue), With<CoreSelectItem>>,
+    q_select_item: Query<(&ChildOf, &SelectedValue, &StyledSelectItem), With<CoreSelectItem>>,
     q_select_trigger: Query<&Children, With<CoreSelectTrigger>>,
+
     mut q_text: Query<&mut Text>,
     mut q_name: Query<&mut Name>,
     mut commands: Commands,
@@ -89,7 +87,7 @@ pub fn on_select_item_selection(
     let selected_entity = trigger.event().0;
 
     // Get the selected item's value and its parent (CoreSelectContent)
-    let (child_of, selected_value) = match q_select_item.get(selected_entity) {
+    let (child_of, selected_value, styled_select_item) = match q_select_item.get(selected_entity) {
         Ok(res) => res,
         Err(_) => return,
     };
@@ -108,12 +106,14 @@ pub fn on_select_item_selection(
         None => return,
     };
 
-    // 2. Deselect all other CoreSelectItems in the same content group
+    // 2. Deselect all other CoreSelectItems in the same content group & set selected
     for child in group_children.iter() {
-        if let Ok((_, value)) = q_select_item.get(child) {
-            commands
-                .entity(child)
-                .insert(IsSelected(value.0 == selected_value.0));
+        if let Ok((_, value, styled_select_item)) = q_select_item.get(child) {
+            if !styled_select_item.disabled {
+                commands
+                    .entity(child)
+                    .insert(IsSelected(value.0 == selected_value.0));
+            }
         }
     }
 
@@ -178,7 +178,7 @@ pub fn update_select_visuals(
         >,
     )>,
 ) {
-    let select_button_styles = theme_manager.styles.select_button_styles.clone();
+    let select_styles = theme_manager.styles.select_styles.clone();
 
     // Store active roots from the triggers.
     let mut active_roots = Vec::new();
@@ -222,14 +222,14 @@ pub fn update_select_visuals(
         border_radius.bottom_right = Val::Px(select_button_size_style.border_radius);
 
         if is_disabled {
-            *bg_color = BackgroundColor(select_button_styles.disabled_background);
-            *border_color = BorderColor(select_button_styles.disabled_border_color);
+            *bg_color = BackgroundColor(select_styles.disabled_background);
+            *border_color = BorderColor(select_styles.disabled_border_color);
         } else if *is_open || *is_hovering {
-            *bg_color = BackgroundColor(select_button_styles.button_background);
-            *border_color = BorderColor(select_button_styles.active_border_color);
+            *bg_color = BackgroundColor(select_styles.background);
+            *border_color = BorderColor(select_styles.active_border_color);
         } else {
-            *bg_color = BackgroundColor(select_button_styles.button_background);
-            *border_color = BorderColor(select_button_styles.active_border_color);
+            *bg_color = BackgroundColor(select_styles.background);
+            *border_color = BorderColor(select_styles.active_border_color);
         }
     }
 
@@ -240,23 +240,18 @@ pub fn update_select_visuals(
         mut bg_color,
         is_disabled,
         item,
-        IsSelected(is_checked),
+        IsSelected(is_selected),
         child_of,
     ) in query_set.p1().iter_mut()
     {
-        // Optionally, you may remove any active root check so that every item updates.
-        // if !active_roots.contains(&child_of.parent()) {
-        //     continue;
-        // }
-
         if item.disabled || is_disabled {
-            *bg_color = BackgroundColor(select_button_styles.disabled_background);
+            *bg_color = BackgroundColor(select_styles.disabled_background);
         } else if hovering.0 {
-            *bg_color = BackgroundColor(select_button_styles.hovered_item_background);
-        } else if item.selected || *is_checked {
-            *bg_color = BackgroundColor(select_button_styles.active_item_background);
+            *bg_color = BackgroundColor(select_styles.hovered_item_background);
+        } else if *is_selected {
+            *bg_color = BackgroundColor(select_styles.active_item_background);
         } else {
-            *bg_color = BackgroundColor(select_button_styles.popover_background);
+            *bg_color = BackgroundColor(select_styles.popover_background);
         }
     }
 
@@ -274,10 +269,10 @@ pub fn update_select_visuals(
         };
 
         // Update the background based on a new field (for example, content_background)
-        *bg_color = BackgroundColor(select_button_styles.popover_background);
+        *bg_color = BackgroundColor(select_styles.popover_background);
 
         node.border = UiRect::all(Val::Px(select_button_size_style.border_width));
-        *border_color = BorderColor(select_button_styles.popover_border_color);
+        *border_color = BorderColor(select_styles.popover_border_color);
 
         border_radius.top_left = Val::Px(select_button_size_style.border_radius);
         border_radius.top_right = Val::Px(select_button_size_style.border_radius);
