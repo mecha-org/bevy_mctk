@@ -10,8 +10,9 @@ use bevy_core_widgets::CoreWidgetsPlugin;
 
 use ui::{
     button::StyledButtonPlugin, checkbox::StyledCheckboxPlugin, input::StyledInputPlugin,
-    progress::StyledProgessPlugin, radio_group::StyledRadioGroupPlugin, slider::StyledSliderPlugin,
-    switch::StyledSwitchPlugin, text::StyledTextPlugin, toggle::StyledTogglePlugin,
+    progress::StyledProgessPlugin, radio_group::StyledRadioGroupPlugin,
+    select::StyledSelectTriggerPlugin, slider::StyledSliderPlugin, switch::StyledSwitchPlugin,
+    text::StyledTextPlugin, toggle::StyledTogglePlugin,
 };
 
 pub struct StyledWidgetsPlugin;
@@ -31,6 +32,7 @@ impl Plugin for StyledWidgetsPlugin {
             StyledCheckboxPlugin,
             StyledSliderPlugin,
             StyledRadioGroupPlugin,
+            StyledSelectTriggerPlugin,
         ));
     }
 }
@@ -44,6 +46,7 @@ pub mod prelude {
     pub use crate::ui::input::*;
     pub use crate::ui::progress::*;
     pub use crate::ui::radio_group::*;
+    pub use crate::ui::select::*;
     pub use crate::ui::slider::*;
     pub use crate::ui::switch::*;
     pub use crate::ui::text::*;

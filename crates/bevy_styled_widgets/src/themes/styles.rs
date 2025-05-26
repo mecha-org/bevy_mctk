@@ -9,8 +9,9 @@ use super::{
     input::InputStyle,
     panel::PanelStyle,
     progress::ProgressStyle,
-    slider::SliderStyle,
     radio::{RadioButtonSizeStyles, RadioButtonVariantStyles, radio_button_sizes},
+    select::{SelectButtonSizeStyles, SelectStyles, select_button_sizes},
+    slider::SliderStyle,
     switch::{SwitchSizeStyles, SwitchVariantStyles, switch_sizes},
     text::TextStyle,
     toggle::{ToggleSizeStyles, ToggleVariantStyles, toggle_sizes},
@@ -34,6 +35,8 @@ pub struct ThemeStyles {
     pub slider: SliderStyle,
     pub radio_buttons: RadioButtonVariantStyles,
     pub radio_button_sizes: RadioButtonSizeStyles,
+    pub select_sizes: SelectButtonSizeStyles,
+    pub select_styles: SelectStyles,
 }
 
 impl ThemeStyles {
@@ -55,6 +58,8 @@ impl ThemeStyles {
             slider: SliderStyle::from_colors(configs.colors.clone()),
             radio_buttons: RadioButtonVariantStyles::from_colors(configs.colors.clone()),
             radio_button_sizes: radio_button_sizes(),
+            select_sizes: select_button_sizes(),
+            select_styles: SelectStyles::from_colors(configs.colors.clone()),
         }
     }
 }
