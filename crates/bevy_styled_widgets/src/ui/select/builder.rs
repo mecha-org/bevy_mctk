@@ -1,12 +1,11 @@
 use bevy::{
-    a11y::AccessibilityNode, color::palettes::css::GRAY, ecs::system::SystemId,
-    input_focus::tab_navigation::TabIndex, prelude::*, window::SystemCursorIcon,
-    winit::cursor::CursorIcon,
+    a11y::AccessibilityNode, ecs::system::SystemId, input_focus::tab_navigation::TabIndex,
+    prelude::*, window::SystemCursorIcon, winit::cursor::CursorIcon,
 };
 use bevy_additional_core_widgets::{
-    CoreSelectContent, CoreSelectItem, CoreSelectTrigger, ListBoxOptionState, SelectHasPopup,
+    CoreSelectContent, CoreSelectItem, CoreSelectTrigger, DropdownOpen, IsSelected, SelectedItem,
 };
-use bevy_core_widgets::{Checked, hover::Hovering};
+use bevy_core_widgets::hover::Hovering;
 
 use crate::themes::ThemeManager;
 
@@ -17,139 +16,27 @@ use super::{
 use accesskit::{Node as Accessible, Role};
 
 #[derive(Component, Default)]
-pub struct SelectContent;
+pub struct SelectWidget; // marker
 
-#[derive(Component, Debug, Clone)]
-pub struct SelectedValue(pub String);
+#[derive(Component, Default)]
+pub struct SelectTrigger; // marker
 
-#[derive(Default, Clone)]
-pub struct SelectItemBuilder {
-    pub selected: bool,
-    pub on_change: Option<SystemId<In<bool>>>,
-    pub disabled: bool,
-    pub key: Option<String>,
+#[derive(Component)]
+pub struct DropdownContainer; // marker
+
+// marker
+#[derive(Component)]
+pub struct DropdownOption {
     pub value: String,
-    pub size: Option<SelectButtonSize>,
+    pub disabled: bool,
 }
 
-impl SelectItemBuilder {
-    pub fn selected(mut self, selected: bool) -> Self {
-        self.selected = selected;
-        self
-    }
-
-    pub fn on_change(mut self, system_id: SystemId<In<bool>>) -> Self {
-        self.on_change = Some(system_id);
-        self
-    }
-
-    pub fn disabled(mut self) -> Self {
-        self.disabled = true;
-        self
-    }
-
-    pub fn key<S: Into<String>>(mut self, key: S) -> Self {
-        self.key = Some(key.into());
-        self
-    }
-
-    pub fn value<S: Into<String>>(mut self, value: S) -> Self {
-        self.value = value.into();
-        self
-    }
-
-    pub fn size(mut self, size: SelectButtonSize) -> Self {
-        self.size = Some(size);
-        self
-    }
-
-    pub fn build(self) -> impl Bundle {
-        let is_selected = self.selected;
-        // let is_disabled = self.disabled;
-
-        let theme_manager = ThemeManager::default();
-        let select_button_size_styles = theme_manager.styles.select_sizes.clone();
-        // Update size styles
-        let select_button_size_style = match self.size.unwrap_or_default() {
-            SelectButtonSize::XSmall => select_button_size_styles.xsmall,
-            SelectButtonSize::Small => select_button_size_styles.small,
-            SelectButtonSize::Medium => select_button_size_styles.medium,
-            SelectButtonSize::Large => select_button_size_styles.large,
-            SelectButtonSize::XLarge => select_button_size_styles.xlarge,
-        };
-        let height = select_button_size_style.min_height;
-        let font_size = select_button_size_style.font_size;
-
-        let key = self.key.clone().unwrap_or_else(|| "".to_string());
-
-        // select content- dropdown
-        let child_nodes = Children::spawn((
-            Spawn((
-                Node {
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Row,
-                    justify_content: JustifyContent::FlexStart,
-                    align_items: AlignItems::Center,
-                    padding: UiRect::axes(Val::Px(8.0), Val::Px(4.0)),
-                    width: Val::Percent(100.0),
-                    height: Val::Px(height),
-                    ..default()
-                },
-                Name::new(self.key.clone().unwrap_or("".to_string())),
-                Children::spawn(Spawn((
-                    Text::new(self.value.clone()),
-                    TextFont {
-                        font_size: font_size,
-                        ..Default::default()
-                    },
-                ))),
-            )),
-            //
-        ));
-
-        (
-            Node {
-                display: Display::None, // Initially hidden
-                flex_direction: FlexDirection::Column,
-                justify_content: JustifyContent::FlexStart,
-                align_items: AlignItems::Stretch,
-                width: Val::Percent(100.0),
-                height: Val::Auto,
-                padding: UiRect::axes(Val::Px(0.0), Val::Px(4.0)),
-                ..default()
-            },
-            GlobalZIndex(99),
-            SelectContent,
-            CoreSelectItem,
-            Name::new("Select Item"),
-            AccessibilityNode(Accessible::new(Role::ListBoxOption)),
-            Hovering::default(),
-            CursorIcon::System(SystemCursorIcon::Pointer),
-            ListBoxOptionState {
-                label: self.value.clone(),
-                is_selected: false,
-            },
-            StyledSelectItem {
-                selected: self.selected,
-                on_change: self.on_change,
-                disabled: self.disabled,
-                key: self.key,
-                value: self.value.clone(),
-            },
-            SelectedValue(self.value.clone()),
-            Checked(is_selected),
-            AccessibleName(key.clone()),
-            TabIndex(0),
-            child_nodes,
-        )
-    }
+// marker
+#[derive(Component)]
+pub struct SelectState {
+    pub selected: Option<String>,
+    pub is_open: bool,
 }
-
-#[derive(Component, Default)]
-pub struct SelectRoot;
-
-#[derive(Component, Default)]
-pub struct SelectTrigger;
 
 #[derive(Default, Clone)]
 pub struct SelectBuilder {
@@ -195,6 +82,8 @@ impl SelectBuilder {
     pub fn build(self) -> (impl Bundle, impl Bundle, impl Bundle, Vec<impl Bundle>) {
         let theme_manager = ThemeManager::default();
         let select_button_size_styles = theme_manager.styles.select_sizes.clone();
+        let select_button_styles = theme_manager.styles.select_button_styles.clone();
+
         // Update size styles
         let select_button_size_style = match self.size.unwrap_or_default() {
             SelectButtonSize::XSmall => select_button_size_styles.xsmall,
@@ -209,7 +98,9 @@ impl SelectBuilder {
 
         let font_size = select_button_size_style.font_size;
 
-        let parent_bundle = (
+        // Root: SelectWidget
+
+        let root = (
             Node {
                 display: Display::Flex,
                 flex_direction: FlexDirection::Column,
@@ -217,11 +108,17 @@ impl SelectBuilder {
                 justify_content: JustifyContent::FlexStart,
                 ..default()
             },
-            SelectRoot,
-            AccessibilityNode(Accessible::new(Role::ListBox)),
+            SelectWidget,
+            SelectState {
+                selected: self.selected_value.clone(),
+                is_open: false,
+            },
+            AccessibilityNode(Accessible::new(Role::ComboBox)),
+            DropdownOpen(false),
+            AccessibleName(self.selected_value.clone().unwrap_or("Select".to_string())),
         );
 
-        let select_trigger_bundle = Children::spawn((Spawn((
+        let trigger = Children::spawn((Spawn((
             Node {
                 display: Display::Flex,
                 flex_direction: FlexDirection::Row,
@@ -240,15 +137,10 @@ impl SelectBuilder {
                 on_change: self.on_change,
                 size: self.size,
             },
-            BackgroundColor(GRAY.into()),
+            BackgroundColor(select_button_styles.button_background.into()),
             Name::new(self.selected_value.clone().unwrap_or("Select".to_string())), // Name::new("Select"),
             Hovering::default(),
             CursorIcon::System(SystemCursorIcon::Pointer),
-            SelectHasPopup(false),
-            SelectTrigger,
-            CoreSelectTrigger {
-                on_click: self.on_click,
-            },
             AccessibilityNode(Accessible::new(Role::Button)),
             TabIndex(0),
             BorderRadius {
@@ -257,7 +149,11 @@ impl SelectBuilder {
                 bottom_left: Val::Px(select_button_size_style.border_radius),
                 bottom_right: Val::Px(select_button_size_style.border_radius),
             },
+            SelectTrigger,
             SelectedValue(self.selected_value.clone().unwrap_or("Select".to_string())),
+            CoreSelectTrigger {
+                on_click: self.on_click,
+            },
             BorderColor::default(),
             Children::spawn(Spawn((
                 Text::new(self.selected_value.clone().unwrap_or("Select".to_string())),
@@ -268,7 +164,8 @@ impl SelectBuilder {
             ))),
         )),));
 
-        let select_content_bundle = (
+        // Dropdown container
+        let dropdown = (
             Node {
                 display: Display::None,
                 flex_direction: FlexDirection::Column,
@@ -277,16 +174,18 @@ impl SelectBuilder {
                 height: Val::Auto,
                 ..default()
             },
+            BackgroundColor(select_button_styles.popover_background.into()),
             BorderRadius {
                 top_left: Val::Px(select_button_size_style.border_radius),
                 top_right: Val::Px(select_button_size_style.border_radius),
                 bottom_left: Val::Px(select_button_size_style.border_radius),
                 bottom_right: Val::Px(select_button_size_style.border_radius),
             },
-            SelectHasPopup(false),
+            DropdownContainer, // marker
             CoreSelectContent {
                 on_change: self.on_change,
             },
+            AccessibilityNode(Accessible::new(Role::ListBox)),
         );
 
         let child_bundles = self
@@ -295,11 +194,133 @@ impl SelectBuilder {
             .map(|builder| builder.size(self.size.unwrap_or_default()).build())
             .collect::<Vec<_>>();
 
+        (root, trigger, dropdown, child_bundles)
+    }
+}
+
+#[derive(Component, Default)]
+pub struct SelectContent;
+
+#[derive(Component, Debug, Clone)]
+pub struct SelectedValue(pub String);
+
+#[derive(Default, Clone)]
+pub struct SelectItemBuilder {
+    pub selected: bool,
+    pub on_change: Option<SystemId<In<bool>>>,
+    pub disabled: bool,
+    pub label: Option<String>,
+    pub value: String,
+    pub size: Option<SelectButtonSize>,
+}
+
+impl SelectItemBuilder {
+    pub fn selected(mut self, selected: bool) -> Self {
+        self.selected = selected;
+        self
+    }
+
+    pub fn on_change(mut self, system_id: SystemId<In<bool>>) -> Self {
+        self.on_change = Some(system_id);
+        self
+    }
+
+    pub fn disabled(mut self) -> Self {
+        self.disabled = true;
+        self
+    }
+
+    pub fn label<S: Into<String>>(mut self, label: S) -> Self {
+        self.label = Some(label.into());
+        self
+    }
+
+    pub fn value<S: Into<String>>(mut self, value: S) -> Self {
+        self.value = value.into();
+        self
+    }
+
+    pub fn size(mut self, size: SelectButtonSize) -> Self {
+        self.size = Some(size);
+        self
+    }
+
+    pub fn build(self) -> impl Bundle {
+        let theme_manager = ThemeManager::default();
+        let select_button_size_styles = theme_manager.styles.select_sizes.clone();
+        // Update size styles
+        let select_button_size_style = match self.size.unwrap_or_default() {
+            SelectButtonSize::XSmall => select_button_size_styles.xsmall,
+            SelectButtonSize::Small => select_button_size_styles.small,
+            SelectButtonSize::Medium => select_button_size_styles.medium,
+            SelectButtonSize::Large => select_button_size_styles.large,
+            SelectButtonSize::XLarge => select_button_size_styles.xlarge,
+        };
+        let height = select_button_size_style.min_height;
+        let font_size = select_button_size_style.font_size;
+
+        // select content- dropdown
+        let child_nodes = Children::spawn((
+            Spawn((
+                Node {
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Row,
+                    justify_content: JustifyContent::FlexStart,
+                    align_items: AlignItems::Center,
+                    padding: UiRect::axes(Val::Px(8.0), Val::Px(4.0)),
+                    width: Val::Percent(100.0),
+                    height: Val::Px(height),
+                    ..default()
+                },
+                Name::new(self.label.clone().unwrap_or("".to_string())),
+                Children::spawn(Spawn((
+                    Text::new(self.value.clone()),
+                    TextFont {
+                        font_size: font_size,
+                        ..Default::default()
+                    },
+                ))),
+            )),
+            //
+        ));
+
         (
-            parent_bundle,
-            select_trigger_bundle,
-            select_content_bundle,
-            child_bundles,
+            Node {
+                display: Display::Flex, // Initially hidden
+                flex_direction: FlexDirection::Column,
+                justify_content: JustifyContent::FlexStart,
+                align_items: AlignItems::Stretch,
+                width: Val::Percent(100.0),
+                height: Val::Auto,
+                padding: UiRect::axes(Val::Px(0.0), Val::Px(4.0)),
+                ..default()
+            },
+            GlobalZIndex(99), // to ensure it appears above other UI elements
+            SelectContent,
+            CoreSelectItem,
+            Name::new("Select Item"),
+            Hovering::default(),
+            CursorIcon::System(SystemCursorIcon::Pointer),
+            StyledSelectItem {
+                selected: self.selected,
+                on_change: self.on_change,
+                disabled: self.disabled,
+                label: self.label.clone(),
+                value: self.value.clone(),
+            },
+            SelectedValue(self.value.clone()),
+            DropdownOption {
+                value: self.value.clone(),
+                disabled: self.disabled,
+            },
+            SelectedItem {
+                label: self.label.clone().unwrap_or(self.value.clone()),
+                value: self.value.clone(),
+            },
+            IsSelected(self.selected),
+            AccessibilityNode(Accessible::new(Role::ListBoxOption)),
+            TabIndex(0),
+            child_nodes,
         )
     }
 }

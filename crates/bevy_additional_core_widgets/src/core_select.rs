@@ -7,32 +7,33 @@ use bevy::{
     prelude::*,
 };
 
-use bevy_core_widgets::{ButtonClicked, Checked, InteractionDisabled, ValueChange};
+use bevy_core_widgets::{ButtonClicked, InteractionDisabled, ValueChange};
 
-use crate::{ListBoxOptionState, interaction_states::SelectHasPopup};
+use crate::{IsSelected, interaction_states::DropdownOpen};
 
 #[derive(Component, Debug)]
-#[require(AccessibilityNode(accesskit::Node::new(Role::ListBox)), SelectHasPopup)]
+#[require(AccessibilityNode(accesskit::Node::new(Role::ComboBox)), DropdownOpen)]
 pub struct CoreSelectTrigger {
     pub on_click: Option<SystemId<In<bool>>>,
 }
 
 pub fn select_on_pointer_click(
     mut trigger: Trigger<Pointer<Click>>,
-    q_state: Query<(
-        &CoreSelectTrigger,
-        &SelectHasPopup,
-        Has<InteractionDisabled>,
-    )>,
+    q_state: Query<(&CoreSelectTrigger, &DropdownOpen, Has<InteractionDisabled>)>,
     mut focus: ResMut<InputFocus>,
     mut focus_visible: ResMut<InputFocusVisible>,
     mut commands: Commands,
 ) {
-    if let Ok((select_trigger, SelectHasPopup(clicked), disabled)) = q_state.get(trigger.target()) {
+    if let Ok((select_trigger, DropdownOpen(clicked), disabled)) = q_state.get(trigger.target()) {
         let select_id = trigger.target();
         focus.0 = Some(select_id);
         focus_visible.0 = false;
         trigger.propagate(false);
+
+        if disabled {
+            // If the select is disabled, do nothing
+            return;
+        }
 
         if !disabled {
             let is_open = clicked;
@@ -41,7 +42,7 @@ pub fn select_on_pointer_click(
             if let Some(on_click) = select_trigger.on_click {
                 commands.run_system_with(on_click, new_clicked);
             } else {
-                commands.trigger_targets(ValueChange(SelectHasPopup(new_clicked)), select_id);
+                commands.trigger_targets(ValueChange(DropdownOpen(new_clicked)), select_id);
             }
         }
     }
@@ -56,7 +57,7 @@ pub struct CoreSelectContent {
 fn select_content_on_button_click(
     mut trigger: Trigger<ButtonClicked>,
     q_group: Query<(&CoreSelectContent, &Children)>,
-    q_select_item: Query<(&Checked, &ChildOf, Has<InteractionDisabled>), With<CoreSelectItem>>,
+    q_select_item: Query<(&IsSelected, &ChildOf, Has<InteractionDisabled>), With<CoreSelectItem>>,
     mut focus: ResMut<InputFocus>,
     mut focus_visible: ResMut<InputFocusVisible>,
     mut commands: Commands,
@@ -83,7 +84,7 @@ fn select_content_on_button_click(
     let select_children = group_children
         .iter()
         .filter_map(|child_id| match q_select_item.get(child_id) {
-            Ok((checked, _, false)) => Some((child_id, checked.0)),
+            Ok((is_selected, _, false)) => Some((child_id, is_selected.0)),
             Ok((_, _, true)) => None,
             Err(_) => None,
         })
@@ -96,15 +97,15 @@ fn select_content_on_button_click(
     trigger.propagate(false);
     let current_select_item = select_children
         .iter()
-        .find(|(_, checked)| *checked)
+        .find(|(_, is_selected)| *is_selected)
         .map(|(id, _)| *id);
 
     if current_select_item == Some(select_id) {
-        // If they clicked the currently checked item, do nothing
+        // If they clicked the currently selected item, do nothing
         return;
     }
 
-    // Trigger the on_change event for the newly checked item
+    // Trigger the on_change event for the newly selected item
     if let Some(on_change) = on_change {
         commands.run_system_with(*on_change, select_id);
     } else {
@@ -115,7 +116,7 @@ fn select_content_on_button_click(
 fn select_content_on_key_input(
     mut trigger: Trigger<FocusedInput<KeyboardInput>>,
     q_group: Query<(&CoreSelectContent, &Children)>,
-    q_select_item: Query<(&Checked, &ChildOf, Has<InteractionDisabled>), With<CoreSelectItem>>,
+    q_select_item: Query<(&IsSelected, &ChildOf, Has<InteractionDisabled>), With<CoreSelectItem>>,
     mut commands: Commands,
 ) {
     if let Ok((CoreSelectContent { on_change }, group_children)) = q_group.get(trigger.target()) {
@@ -138,7 +139,7 @@ fn select_content_on_key_input(
             let select_children = group_children
                 .iter()
                 .filter_map(|child_id| match q_select_item.get(child_id) {
-                    Ok((checked, _, false)) => Some((child_id, checked.0)),
+                    Ok((is_selected, _, false)) => Some((child_id, is_selected.0)),
                     Ok((_, _, true)) => None,
                     Err(_) => None,
                 })
@@ -149,8 +150,8 @@ fn select_content_on_key_input(
             }
             let current_index = select_children
                 .iter()
-                .position(|(_, checked)| *checked)
-                .unwrap_or(usize::MAX); // Default to invalid index if none are checked
+                .position(|(_, is_selected)| *is_selected)
+                .unwrap_or(usize::MAX); // Default to invalid index if none are selected
 
             let next_index = match key_code {
                 KeyCode::ArrowUp | KeyCode::ArrowLeft => {
@@ -193,7 +194,7 @@ fn select_content_on_key_input(
 
             let (next_id, _) = select_children[next_index];
 
-            // Trigger the on_change event for the newly checked select item
+            // Trigger the on_change event for the newly selected item
             if let Some(on_change) = on_change {
                 commands.run_system_with(*on_change, next_id);
             } else {
@@ -204,30 +205,30 @@ fn select_content_on_key_input(
 }
 
 #[derive(Component, Debug)]
-#[require(AccessibilityNode(accesskit::Node::new(Role::ListBoxOption)), Checked)]
+#[require(
+    AccessibilityNode(accesskit::Node::new(Role::ListBoxOption)),
+    IsSelected
+)]
 pub struct CoreSelectItem;
 
 fn select_item_on_pointer_click(
     mut trigger: Trigger<Pointer<Click>>,
-    q_state: Query<(&Checked, Has<InteractionDisabled>), With<CoreSelectItem>>,
+    q_state: Query<(&IsSelected, Has<InteractionDisabled>), With<CoreSelectItem>>,
     mut focus: ResMut<InputFocus>,
     mut focus_visible: ResMut<InputFocusVisible>,
     mut commands: Commands,
 ) {
-    if let Ok((checked, disabled)) = q_state.get(trigger.target()) {
+    if let Ok((is_selected, disabled)) = q_state.get(trigger.target()) {
         let checkbox_id = trigger.target();
         focus.0 = Some(checkbox_id);
         focus_visible.0 = false;
         trigger.propagate(false);
-        if checked.0 || disabled {
-            // If the radio is already checked, or disabled, we do nothing.
+        if is_selected.0 || disabled {
             return;
         }
         commands.trigger_targets(ButtonClicked, trigger.target());
     }
 }
-
-// -----
 
 pub struct CoreSelectPlugin;
 

@@ -5,7 +5,7 @@ mod interaction_states;
 pub use core_select::{CoreSelectContent, CoreSelectItem, CoreSelectPlugin, CoreSelectTrigger};
 pub use core_switch::{CoreSwitch, CoreSwitchPlugin};
 
-pub use interaction_states::{ListBoxOptionState, SelectHasPopup};
+pub use interaction_states::{DropdownOpen, IsSelected, SelectedItem};
 pub struct AdditionalCoreWidgetsPlugin;
 
 impl Plugin for AdditionalCoreWidgetsPlugin {

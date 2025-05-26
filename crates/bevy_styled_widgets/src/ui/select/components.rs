@@ -10,7 +10,7 @@ pub struct StyledSelectItem {
     #[reflect(ignore)]
     pub on_change: Option<SystemId<In<bool>>>,
     pub disabled: bool,
-    pub key: Option<String>,
+    pub label: Option<String>,
     pub value: String,
 }
 

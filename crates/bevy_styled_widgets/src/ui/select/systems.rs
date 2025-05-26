@@ -1,60 +1,66 @@
+use std::process::Child;
+
 use bevy::prelude::*;
 use bevy_additional_core_widgets::{
-    CoreSelectContent, CoreSelectItem, CoreSelectTrigger, ListBoxOptionState, SelectHasPopup,
+    CoreSelectContent, CoreSelectItem, CoreSelectTrigger, DropdownOpen, IsSelected,
 };
-use bevy_core_widgets::{Checked, InteractionDisabled, ValueChange, hover::Hovering};
+use bevy_core_widgets::{InteractionDisabled, ValueChange, hover::Hovering};
 
 use crate::themes::ThemeManager;
 
 use super::{
-    SelectButtonSize, SelectContent, StyledSelect, StyledSelectItem, builder::SelectedValue,
+    DropdownContainer, SelectButtonSize, SelectContent, SelectState, SelectTrigger, SelectWidget,
+    StyledSelect, StyledSelectItem, builder::SelectedValue,
 };
 
-#[allow(clippy::type_complexity)]
 pub fn on_select_triggered(
-    mut trigger: Trigger<ValueChange<SelectHasPopup>>,
-    query: Query<&StyledSelect>,
+    mut trigger: Trigger<ValueChange<DropdownOpen>>,
     mut commands: Commands,
+    all_triggers: Query<(Entity, &StyledSelect), With<SelectTrigger>>,
 ) {
     trigger.propagate(false);
 
     let clicked = &trigger.event().0;
-    let entity = trigger.target();
 
-    commands.entity(entity).insert(SelectHasPopup(clicked.0));
+    let clicked_entity = trigger.target();
 
-    if let Ok(styled_select) = query.get(entity) {
+    // Close all other dropdowns and update the clicked one
+    for (entity, styled_select) in &all_triggers {
         if styled_select.disabled {
             commands.entity(entity).insert(InteractionDisabled);
+            continue;
         }
-        if let Some(system_id) = styled_select.on_click {
-            // Defer the callback system using commands
-            commands.run_system_with(system_id, clicked.0);
+
+        if entity == clicked_entity {
+            commands.entity(entity).insert(DropdownOpen(clicked.0));
+            if let Some(system_id) = styled_select.on_click {
+                commands.run_system_with(system_id, clicked.0);
+            }
+        } else {
+            commands.entity(entity).insert(DropdownOpen(false));
         }
     }
 }
 
-pub fn open_select_popup(
-    mut query_set: ParamSet<(
-        Query<&mut Node, With<SelectContent>>,
-        Query<&mut Node, With<CoreSelectContent>>,
-    )>,
-    has_popup_query: Query<&SelectHasPopup, Changed<SelectHasPopup>>,
+pub fn open_select_content(
+    query_open_widgets: Query<(Entity, &DropdownOpen), Changed<DropdownOpen>>,
+    root_query: Query<(&Children, Entity), With<SelectWidget>>,
+    mut dropdown_query: Query<(Entity, &mut Node), With<DropdownContainer>>,
 ) {
-    for SelectHasPopup(is_open) in has_popup_query.iter() {
-        if *is_open {
-            for mut content in query_set.p0().iter_mut() {
-                content.display = Display::Flex;
-            }
-            for mut content in query_set.p1().iter_mut() {
-                content.display = Display::Flex;
-            }
-        } else {
-            for mut content in query_set.p0().iter_mut() {
-                content.display = Display::None;
-            }
-            for mut content in query_set.p1().iter_mut() {
-                content.display = Display::None;
+    for (widget_entity, DropdownOpen(is_open)) in &query_open_widgets {
+        // Find the root SelectWidget this DropdownOpen belongs to
+        for (children, root_entity) in &root_query {
+            if children.contains(&widget_entity) {
+                // Update its dropdown container
+                for &child in children {
+                    if let Ok((dropdown_entity, mut node)) = dropdown_query.get_mut(child) {
+                        node.display = if *is_open {
+                            Display::Flex
+                        } else {
+                            Display::None
+                        };
+                    }
+                }
             }
         }
     }
@@ -62,59 +68,71 @@ pub fn open_select_popup(
 
 pub fn on_select_item_selection(
     mut trigger: Trigger<ValueChange<Entity>>,
+    q_select_widget: Query<(&Children, Entity), With<SelectWidget>>,
     q_select_content: Query<&Children, With<CoreSelectContent>>,
     q_select_item: Query<(&ChildOf, &SelectedValue), With<CoreSelectItem>>,
-    q_select_trigger: Query<(&StyledSelect, &Children), With<CoreSelectTrigger>>,
+    q_select_trigger: Query<&Children, With<CoreSelectTrigger>>,
     mut q_text: Query<&mut Text>,
     mut q_name: Query<&mut Name>,
     mut commands: Commands,
 ) {
     trigger.propagate(false);
 
-    let target = trigger.target();
+    let target = trigger.target(); // the CoreSelectContent entity
 
-    // Ensure the trigger target is CoreSelectContent
-    if !q_select_content.contains(target) {
-        return;
-    }
+    // Only proceed if the trigger target is a valid CoreSelectContent
+    let group_children = match q_select_content.get(target) {
+        Ok(children) => children,
+        Err(_) => return,
+    };
 
     let selected_entity = trigger.event().0;
 
-    // Get the selected item's value and the parent content it belongs to
+    // Get the selected item's value and its parent (CoreSelectContent)
     let (child_of, selected_value) = match q_select_item.get(selected_entity) {
         Ok(res) => res,
         Err(_) => return,
     };
 
-    let group_children = match q_select_content.get(child_of.parent()) {
-        Ok(children) => children,
-        Err(_) => return,
+    // 1. Find the root SelectWidget this content belongs to
+    let mut widget_entity = None;
+    for (children, root) in &q_select_widget {
+        if children.contains(&target) {
+            widget_entity = Some((root, children));
+            break;
+        }
+    }
+
+    let (widget_entity, widget_children) = match widget_entity {
+        Some(val) => val,
+        None => return,
     };
 
-    // Deselect all others in the same CoreSelectContent group
+    // 2. Deselect all other CoreSelectItems in the same content group
     for child in group_children.iter() {
         if let Ok((_, value)) = q_select_item.get(child) {
             commands
                 .entity(child)
-                .insert(Checked(value.0 == selected_value.0));
+                .insert(IsSelected(value.0 == selected_value.0));
         }
     }
 
-    // Update the trigger text
-    for (_styled_select, trigger_children) in q_select_trigger.iter() {
-        for child in trigger_children.iter() {
-            if let Ok(mut text) = q_text.get_mut(child) {
-                text.0 = selected_value.0.clone();
-            }
-
-            if let Ok(mut name) = q_name.get_mut(child) {
-                name.set(selected_value.0.clone());
+    // 3. Update the text and name of the trigger that belongs to this specific widget
+    for child in widget_children.iter() {
+        if let Ok(trigger_children) = q_select_trigger.get(child) {
+            for grandchild in trigger_children.iter() {
+                if let Ok(mut text) = q_text.get_mut(grandchild) {
+                    text.0 = selected_value.0.clone();
+                }
+                if let Ok(mut name) = q_name.get_mut(grandchild) {
+                    name.set(selected_value.0.clone());
+                }
             }
         }
     }
 
-    // Close dropdown
-    commands.entity(target).insert(SelectHasPopup(false));
+    // 4. Close the dropdown (just for this widget)
+    commands.entity(target).insert(DropdownOpen(false));
 }
 
 #[allow(clippy::type_complexity)]
@@ -123,9 +141,10 @@ pub fn update_select_visuals(
     mut query_set: ParamSet<(
         Query<
             (
+                Entity,
                 &mut Node,
                 &Hovering,
-                &SelectHasPopup,
+                &DropdownOpen,
                 &mut StyledSelect,
                 &mut BackgroundColor,
                 &mut BorderColor,
@@ -136,33 +155,47 @@ pub fn update_select_visuals(
         >,
         Query<
             (
+                Entity,
                 &Hovering,
                 &mut BackgroundColor,
-                &ListBoxOptionState,
                 Has<InteractionDisabled>,
                 &StyledSelectItem,
-                &Checked,
+                &IsSelected,
+                &ChildOf,
             ),
             With<CoreSelectItem>,
         >,
+        Query<
+            (
+                Entity,
+                &mut Node,
+                &mut BackgroundColor,
+                &mut BorderColor,
+                &mut BorderRadius,
+                &StyledSelect,
+            ),
+            (With<CoreSelectContent>, Without<CoreSelectTrigger>),
+        >,
     )>,
-    mut core_select_content_query: Query<
-        (
-            &mut Node,
-            &mut BorderColor,
-            &mut BorderRadius,
-            &StyledSelect,
-        ),
-        (With<CoreSelectContent>, Without<CoreSelectTrigger>),
-    >,
 ) {
     let select_button_styles = theme_manager.styles.select_button_styles.clone();
 
-    // Query 0: Trigger
+    // Store active roots from the triggers.
+    let mut active_roots = Vec::new();
+    for (trigger_entity, _, Hovering(is_hovering), DropdownOpen(is_open), _, _, _, _, _) in
+        query_set.p0().iter()
+    {
+        if *is_open || *is_hovering {
+            active_roots.push(trigger_entity);
+        }
+    }
+
+    // === Part 2: Update trigger visuals for active roots only ===
     for (
-        mut select_trigger_node,
+        trigger_entity,
+        mut node,
         Hovering(is_hovering),
-        SelectHasPopup(has_popup),
+        DropdownOpen(is_open),
         select_button,
         mut bg_color,
         mut border_color,
@@ -170,8 +203,10 @@ pub fn update_select_visuals(
         is_disabled,
     ) in query_set.p0().iter_mut()
     {
+        if !active_roots.contains(&trigger_entity) {
+            continue;
+        }
         let select_button_size_styles = theme_manager.styles.select_sizes.clone();
-
         let select_button_size_style = match select_button.size.unwrap_or_default() {
             SelectButtonSize::XSmall => select_button_size_styles.xsmall,
             SelectButtonSize::Small => select_button_size_styles.small,
@@ -180,9 +215,7 @@ pub fn update_select_visuals(
             SelectButtonSize::XLarge => select_button_size_styles.xlarge,
         };
 
-        select_trigger_node.border = UiRect::all(Val::Px(select_button_size_style.border_width));
-
-        // border radius
+        node.border = UiRect::all(Val::Px(select_button_size_style.border_width));
         border_radius.top_left = Val::Px(select_button_size_style.border_radius);
         border_radius.top_right = Val::Px(select_button_size_style.border_radius);
         border_radius.bottom_left = Val::Px(select_button_size_style.border_radius);
@@ -191,7 +224,7 @@ pub fn update_select_visuals(
         if is_disabled {
             *bg_color = BackgroundColor(select_button_styles.disabled_background);
             *border_color = BorderColor(select_button_styles.disabled_border_color);
-        } else if *has_popup || *is_hovering {
+        } else if *is_open || *is_hovering {
             *bg_color = BackgroundColor(select_button_styles.button_background);
             *border_color = BorderColor(select_button_styles.active_border_color);
         } else {
@@ -200,27 +233,38 @@ pub fn update_select_visuals(
         }
     }
 
-    // Query 1: Items
-    for (hovering, mut bg_color, option_state, is_disabled, item, Checked(checked)) in
-        query_set.p1().iter_mut()
+    // === Part 3: Update CoreSelectItem visuals, including hovered state ===
+    for (
+        _item_entity,
+        hovering,
+        mut bg_color,
+        is_disabled,
+        item,
+        IsSelected(is_checked),
+        child_of,
+    ) in query_set.p1().iter_mut()
     {
+        // Optionally, you may remove any active root check so that every item updates.
+        // if !active_roots.contains(&child_of.parent()) {
+        //     continue;
+        // }
+
         if item.disabled || is_disabled {
             *bg_color = BackgroundColor(select_button_styles.disabled_background);
         } else if hovering.0 {
             *bg_color = BackgroundColor(select_button_styles.hovered_item_background);
-        } else if item.selected || option_state.is_selected || *checked {
+        } else if item.selected || *is_checked {
             *bg_color = BackgroundColor(select_button_styles.active_item_background);
         } else {
             *bg_color = BackgroundColor(select_button_styles.popover_background);
         }
     }
 
-    // Update the CoreSelectContent background and border color
-    for (mut core_select_content_node, mut border_color, mut border_radius, select) in
-        core_select_content_query.iter_mut()
+    // === Part 4: Update CoreSelectContent visuals ===
+    for (entity, mut node, mut bg_color, mut border_color, mut border_radius, select) in
+        query_set.p2().iter_mut()
     {
         let select_button_size_styles = theme_manager.styles.select_sizes.clone();
-
         let select_button_size_style = match select.size.unwrap_or_default() {
             SelectButtonSize::XSmall => select_button_size_styles.xsmall,
             SelectButtonSize::Small => select_button_size_styles.small,
@@ -228,11 +272,13 @@ pub fn update_select_visuals(
             SelectButtonSize::Large => select_button_size_styles.large,
             SelectButtonSize::XLarge => select_button_size_styles.xlarge,
         };
-        core_select_content_node.border =
-            UiRect::all(Val::Px(select_button_size_style.border_width));
+
+        // Update the background based on a new field (for example, content_background)
+        *bg_color = BackgroundColor(select_button_styles.popover_background);
+
+        node.border = UiRect::all(Val::Px(select_button_size_style.border_width));
         *border_color = BorderColor(select_button_styles.popover_border_color);
 
-        // border radius
         border_radius.top_left = Val::Px(select_button_size_style.border_radius);
         border_radius.top_right = Val::Px(select_button_size_style.border_radius);
         border_radius.bottom_left = Val::Px(select_button_size_style.border_radius);

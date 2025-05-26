@@ -1,10 +1,11 @@
 use bevy::{input_focus::tab_navigation::TabGroup, prelude::*, winit::WinitSettings};
+use bevy_additional_core_widgets::IsSelected;
 use bevy_core_widgets::Checked;
 use bevy_styled_widgets::prelude::*;
 
 fn main() {
     App::new()
-        .add_plugins((DefaultPlugins, StyledWidgetsPligin))
+        .add_plugins((DefaultPlugins, StyledWidgetsPlugin))
         .insert_resource(ThemeManager::default())
         .insert_resource(WinitSettings::desktop_app())
         .add_systems(Startup, setup_view_root)
@@ -44,7 +45,7 @@ fn set_theme(id: ThemeId) -> impl FnMut(ResMut<ThemeManager>) + Clone {
     }
 }
 
-fn run_on_select_item_selected(
+fn run_on_select_changed(
     In(selected_entity): In<Entity>,
     q_select_content: Query<&Children>,
     select_query: Query<(&ChildOf, &SelectedValue)>,
@@ -77,24 +78,43 @@ fn setup_view_root(mut commands: Commands) {
     let on_yellow_theme = commands.register_system(set_theme(ThemeId("yellow".into())));
     let on_violet_theme = commands.register_system(set_theme(ThemeId("violet".into())));
 
+    let select_on_change_system_id = commands.register_system(run_on_select_changed);
+
+    // TODO: try with/without key/value
+    let options_l = vec![
+        StyledSelectItem::builder()
+            .label("Option 1".to_string())
+            .value("Option 1".to_string()),
+        StyledSelectItem::builder()
+            .label("Option 2".to_string())
+            .value("Option 2".to_string()),
+        StyledSelectItem::builder()
+            .label("Option 3".to_string())
+            .value("Option 3".to_string()),
+    ];
+
     let options = vec![
         StyledSelectItem::builder()
-            .key("Juice".to_string())
+            .label("Juice".to_string())
             .value("Juice".to_string()),
         StyledSelectItem::builder()
-            .key("Tea".to_string())
+            .label("Tea".to_string())
             .value("Tea".to_string()),
         StyledSelectItem::builder()
-            .key("Coffee".to_string())
+            .label("Coffee".to_string())
             .value("Coffee".to_string()),
     ];
 
-    // default medium size
     let (parent_bundle, select_trigger_bundle, select_content_bundle, child_bundles) =
         StyledSelect::builder()
             .children(options.clone())
-            .size(SelectButtonSize::Large)
-            // .on_change(commands.register_system(run_on_select_item_selected))
+            // .on_change(select_on_change_system_id)
+            .build();
+
+    let (parent_bundle_l, select_trigger_bundle_l, select_content_bundle_l, child_bundles_l) =
+        StyledSelect::builder()
+            .children(options_l.clone())
+            .size(SelectButtonSize::XLarge)
             .build();
 
     commands
@@ -234,5 +254,38 @@ fn setup_view_root(mut commands: Commands) {
                             }
                         });
                 });
+
+            parent.spawn(
+                StyledText::builder()
+                    .content("Sizes")
+                    .font_size(24.0)
+                    .build(),
+            );
+
+            parent
+                .spawn((Node {
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Row,
+                    align_items: AlignItems::Start,
+                    align_content: AlignContent::Start,
+                    padding: UiRect::axes(Val::Px(12.0), Val::Px(0.0)),
+                    width: Val::Px(45.),
+                    height: Val::Px(60.),
+                    ..default()
+                },))
+                .insert(parent_bundle_l)
+                .insert(select_trigger_bundle_l)
+                .with_children(|parent| {
+                    parent
+                        .spawn(select_content_bundle_l)
+                        .with_children(|content| {
+                            for child in child_bundles_l {
+                                content.spawn(child);
+                            }
+                        });
+                });
         });
+
+    // understand spawning diff
+    // start from query
 }
