@@ -1,5 +1,5 @@
 use bevy::{input_focus::tab_navigation::TabGroup, prelude::*, winit::WinitSettings};
-use bevy_core_widgets::InteractionDisabled;
+use bevy_core_widgets::{CoreSlider, InteractionDisabled};
 use bevy_styled_widgets::prelude::*;
 
 fn main() {
@@ -44,8 +44,27 @@ fn set_theme(id: ThemeId) -> impl FnMut(ResMut<ThemeManager>) + Clone {
     }
 }
 
+#[derive(Component)]
+pub struct XLSlider;
+
+fn xl_slider_on_change(
+    In(value): In<f32>,
+    mut query: Query<(&mut StyledSlider, Entity, &mut CoreSlider), With<XLSlider>>,
+    mut commands: Commands,
+) {
+    for (styled_slider, entity, mut core_slider) in &mut query {
+        if styled_slider.disabled {
+            commands.entity(entity).insert(InteractionDisabled);
+            return;
+        } else {
+            core_slider.set_value(value);
+        }
+    }
+}
+
 fn setup_view_root(mut commands: Commands) {
     commands.spawn(Camera2d);
+    let xl_slider_on_change_system = commands.register_system(xl_slider_on_change);
 
     let on_toogle_theme_mode = commands.register_system(toggle_mode);
 
@@ -272,14 +291,16 @@ fn setup_view_root(mut commands: Commands) {
                             .font_size(14.0)
                             .build(),
                     ),
-                    Spawn(
+                    Spawn((
                         StyledSlider::builder()
                             .max(100.)
                             .min(0.)
                             .value(50.)
                             .size(SliderSize::XLarge)
+                            .on_change(xl_slider_on_change_system)
                             .build(),
-                    ),
+                        XLSlider,
+                    )),
                 )),
             )),
             Spawn(
