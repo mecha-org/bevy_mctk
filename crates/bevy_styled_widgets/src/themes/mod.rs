@@ -1,5 +1,4 @@
 pub mod button;
-pub mod fonts;
 pub mod input;
 pub mod panel;
 pub mod styles;
@@ -10,6 +9,7 @@ pub use manager::*;
 
 pub mod checkbox;
 pub mod progress;
+pub mod radio;
 pub mod radio;
 pub mod select;
 pub mod slider;

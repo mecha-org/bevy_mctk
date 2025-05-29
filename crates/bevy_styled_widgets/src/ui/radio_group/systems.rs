@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use bevy_core_widgets::{Checked, InteractionDisabled, ValueChange, hover::Hovering};
 
 use super::{
+    RadioButtonSize,
     builder::{RadioValue, RootComponent},
     components::{RadioButtonVariant, StyledRadioButton},
 };
@@ -12,7 +13,8 @@ use bevy_core_widgets::{CoreRadio, CoreRadioGroup};
 pub fn update_radio_button_visuals(
     theme_manager: Res<ThemeManager>,
     mut query: Query<
-        (            
+        (    
+            &mut Node,       
             &StyledRadioButton,
             &Hovering,
             &Checked,
@@ -26,6 +28,7 @@ pub fn update_radio_button_visuals(
     mut q_caption_text: Query<&mut TextColor>,
 ) {
     for (
+        mut button_node,
         radio_button,
         Hovering(is_hovering),
         Checked(checked),
@@ -33,6 +36,21 @@ pub fn update_radio_button_visuals(
         children,
     ) in query.iter_mut()
     {
+        let button_size_styles = theme_manager.styles.radio_button_sizes.clone();
+        let radio_button_size_style = match radio_button.size.unwrap_or_default() {
+            RadioButtonSize::XSmall => button_size_styles.xsmall,
+            RadioButtonSize::Small => button_size_styles.small,
+            RadioButtonSize::Medium => button_size_styles.medium,
+            RadioButtonSize::Large => button_size_styles.large,
+            RadioButtonSize::XLarge => button_size_styles.xlarge,
+        };
+        button_node.padding = UiRect::axes(
+            Val::Px(radio_button_size_style.padding_horizontal),
+            Val::Px(radio_button_size_style.padding_vertical),
+        );
+
+        button_node.column_gap = Val::Px(radio_button_size_style.column_gap);
+
         let radio_button_styles = theme_manager.styles.radio_buttons.clone();
 
         let radio_button_style = match radio_button.variant {
@@ -64,8 +82,8 @@ pub fn update_radio_button_visuals(
                     radio_button_style.disabled_outer_border,
                 ),
                 (true, false, true) => (
-                    radio_button_style.hovered_inner_checked_background,
-                    radio_button_style.hovered_outer_border,
+                    radio_button_style.inner_checked_background,
+                    radio_button_style.outer_border,
                 ),
                 (false, false, true) => (
                     radio_button_style.hovered_inner_unchecked_background,

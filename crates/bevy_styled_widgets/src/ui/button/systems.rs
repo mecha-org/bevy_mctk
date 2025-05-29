@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_core_widgets::{ButtonPressed, InteractionDisabled, hover::Hovering};
 
-use crate::themes::{ThemeManager, fonts::FontAssets};
+use crate::themes::ThemeManager;
 
 use super::{
     ButtonSize,
@@ -70,6 +70,11 @@ pub fn update_button(
                     };
                     text_font.font_size = button_size_style.font_size;
 
+                    //update text
+                    if let Some(text_str) = button.text.clone() {
+                        text.0 = text_str.clone();
+                    }
+
                     //update icon
                     if let Some(icon) = button.icon.clone() {
                         if let Some(theme_icon) = theme_icons.get(&icon) {
@@ -77,6 +82,11 @@ pub fn update_button(
                         } else {
                             text.0 = icon;
                         };
+                    }
+
+                    //update font
+                    if let Some(font) = &button.font {
+                        text_font.font = font.clone();
                     }
                 }
             }
@@ -127,32 +137,5 @@ pub fn update_button(
         border_radius.top_right = Val::Px(button_size_style.border_radius);
         border_radius.bottom_left = Val::Px(button_size_style.border_radius);
         border_radius.bottom_right = Val::Px(button_size_style.border_radius);
-    }
-}
-
-pub fn init(
-    mut commands: Commands,
-    mut query: Query<(Entity, &StyledButton)>,
-    font_assets: Res<FontAssets>,
-) {
-    for (entity, button) in query.iter_mut() {
-        let mut command = commands.entity(entity);
-
-        let StyledButton { text, icon, .. } = button;
-
-        let text_or_icon = text.clone().or_else(|| icon.clone());
-        if let Some(text_or_icon) = text_or_icon {
-            command.with_children(|parent| {
-                parent.spawn((
-                    Text::new(text_or_icon.clone()),
-                    TextFont {
-                        font: font_assets.font_icons.clone(),
-                        font_size: 14.0,
-                        ..default()
-                    },
-                    StyledButtonText,
-                ));
-            });
-        }
     }
 }
