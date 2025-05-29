@@ -8,12 +8,23 @@ pub struct StyledProgress {
     pub value: f32,
     pub root_color: Option<Color>,
     pub indicator_color: Option<Color>,
+    pub size: Option<ProgressSize>,
 }
 
 impl StyledProgress {
     pub fn builder() -> super::builder::ProgressBuilder {
         super::builder::ProgressBuilder::default()
     }
+}
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, Component, Reflect)]
+pub enum ProgressSize {
+    XSmall,
+    Small,
+    #[default]
+    Medium,
+    Large,
+    XLarge,
 }
 
 #[derive(Component, Default)]

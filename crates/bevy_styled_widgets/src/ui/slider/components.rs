@@ -13,12 +13,24 @@ pub struct StyledSlider {
     pub hovered_thumb_color: Option<Color>,
     #[reflect(ignore)]
     pub on_change: Option<SystemId<In<f32>>>,
+    pub size: Option<SliderSize>,
+    pub disabled: bool,
 }
 
 impl StyledSlider {
     pub fn builder() -> super::builder::SliderBuilder {
         super::builder::SliderBuilder::default()
     }
+}
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, Component, Reflect)]
+pub enum SliderSize {
+    XSmall,
+    Small,
+    #[default]
+    Medium,
+    Large,
+    XLarge,
 }
 
 #[derive(Component, Default)]

@@ -1,9 +1,10 @@
 use bevy::{input_focus::tab_navigation::TabGroup, prelude::*, winit::WinitSettings};
+use bevy_core_widgets::Checked;
 use bevy_styled_widgets::prelude::*;
 
 fn main() {
     App::new()
-        .add_plugins((DefaultPlugins, StyledWidgetsPlugin))
+        .add_plugins((DefaultPlugins, StyledWidgetsPligin))
         .insert_resource(ThemeManager::default())
         .insert_resource(WinitSettings::desktop_app())
         .add_systems(Startup, setup_view_root)
@@ -43,10 +44,28 @@ fn set_theme(id: ThemeId) -> impl FnMut(ResMut<ThemeManager>) + Clone {
     }
 }
 
+fn run_on_select_item_selected(
+    In(selected_entity): In<Entity>,
+    q_select_content: Query<&Children>,
+    select_query: Query<(&ChildOf, &SelectedValue)>,
+    mut commands: Commands,
+) {
+    if let Ok((child_of, selected_value)) = select_query.get(selected_entity) {
+        let group_children = q_select_content.get(child_of.parent()).unwrap();
+        for select_item_child in group_children.iter() {
+            if let Ok((_, value)) = select_query.get(select_item_child) {
+                commands
+                    .entity(select_item_child)
+                    .insert(Checked(value.0 == selected_value.0));
+            }
+        }
+    }
+}
+
 fn setup_view_root(mut commands: Commands) {
     commands.spawn(Camera2d);
 
-    let on_toogle_theme_mode = commands.register_system(toggle_mode);
+    let on_toggle_theme_mode = commands.register_system(toggle_mode);
 
     // Example theme change handlers (register your real handlers)
     let on_default_theme = commands.register_system(set_theme(ThemeId("default".into())));
@@ -58,24 +77,45 @@ fn setup_view_root(mut commands: Commands) {
     let on_yellow_theme = commands.register_system(set_theme(ThemeId("yellow".into())));
     let on_violet_theme = commands.register_system(set_theme(ThemeId("violet".into())));
 
-    commands.spawn((
-        Node {
-            display: Display::Flex,
-            flex_direction: FlexDirection::Column,
-            position_type: PositionType::Absolute,
-            left: Val::Px(0.),
-            top: Val::Px(0.),
-            right: Val::Px(0.),
-            bottom: Val::Px(0.),
-            padding: UiRect::all(Val::Px(3.)),
-            row_gap: Val::Px(18.),
-            ..Default::default()
-        },
-        RootWindow,
-        TabGroup::default(),
-        Children::spawn((
-            // Theme selection row
-            Spawn((
+    let options = vec![
+        StyledSelectItem::builder()
+            .key("Juice".to_string())
+            .value("Juice".to_string()),
+        StyledSelectItem::builder()
+            .key("Tea".to_string())
+            .value("Tea".to_string()),
+        StyledSelectItem::builder()
+            .key("Coffee".to_string())
+            .value("Coffee".to_string()),
+    ];
+
+    // default medium size
+    let (parent_bundle, select_trigger_bundle, select_content_bundle, child_bundles) =
+        StyledSelect::builder()
+            .children(options.clone())
+            .size(SelectButtonSize::Large)
+            // .on_change(commands.register_system(run_on_select_item_selected))
+            .build();
+
+    commands
+        .spawn((
+            Node {
+                display: Display::Flex,
+                flex_direction: FlexDirection::Column,
+                position_type: PositionType::Absolute,
+                left: Val::Px(0.),
+                top: Val::Px(0.),
+                right: Val::Px(0.),
+                bottom: Val::Px(0.),
+                padding: UiRect::all(Val::Px(3.)),
+                row_gap: Val::Px(18.),
+                ..Default::default()
+            },
+            RootWindow,
+            TabGroup::default(),
+        ))
+        .with_children(|parent| {
+            parent.spawn((
                 Node {
                     display: Display::Flex,
                     flex_direction: FlexDirection::Row,
@@ -143,9 +183,9 @@ fn setup_view_root(mut commands: Commands) {
                             .build(),
                     ),
                 )),
-            )),
-            // Light / Dark toggle row
-            Spawn((
+            ));
+
+            parent.spawn((
                 Node {
                     display: Display::Flex,
                     flex_direction: FlexDirection::Row,
@@ -155,114 +195,44 @@ fn setup_view_root(mut commands: Commands) {
                     padding: UiRect::axes(Val::Px(12.0), Val::Px(0.0)),
                     ..default()
                 },
-                Children::spawn((Spawn((
+                Children::spawn(Spawn((
                     StyledButton::builder()
                         .icon("theme_mode_toggle")
-                        .on_click(on_toogle_theme_mode)
+                        .on_click(on_toggle_theme_mode)
                         .variant(ButtonVariant::Secondary)
                         .build(),
                     ThemeToggleButton,
-                )),)),
-            )),
-            // Buttons section
-            Spawn(
+                ))),
+            ));
+
+            parent.spawn(
                 StyledText::builder()
-                    .content("Progress")
+                    .content("Select")
                     .font_size(24.0)
                     .build(),
-            ),
-            Spawn((
-                Node {
+            );
+
+            parent
+                .spawn((Node {
                     display: Display::Flex,
-                    flex_direction: FlexDirection::Column,
-                    justify_content: JustifyContent::Start,
-                    align_items: AlignItems::Stretch,
-                    align_content: AlignContent::Stretch,
+                    flex_direction: FlexDirection::Row,
+                    align_items: AlignItems::Start,
+                    align_content: AlignContent::Start,
                     padding: UiRect::axes(Val::Px(12.0), Val::Px(0.0)),
+                    width: Val::Px(45.),
+                    height: Val::Px(60.),
                     ..default()
-                },
-                Children::spawn((Spawn(StyledProgress::builder().value(50.).build()),)),
-            )),
-            Spawn(
-                StyledText::builder()
-                    .content("Sizes")
-                    .font_size(24.0)
-                    .build(),
-            ),
-            Spawn((
-                Node {
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Column,
-                    justify_content: JustifyContent::Stretch,
-                    align_items: AlignItems::Stretch,
-                    align_content: AlignContent::Stretch,
-                    padding: UiRect::axes(Val::Px(12.0), Val::Px(12.0)),
-                    column_gap: Val::Px(10.0),
-                    ..default()
-                },
-                Children::spawn((
-                    Spawn(
-                        StyledText::builder()
-                            .content("XSmall")
-                            .font_size(14.0)
-                            .build(),
-                    ),
-                    Spawn(
-                        StyledProgress::builder()
-                            .value(50.)
-                            .size(ProgressSize::XSmall)
-                            .build(),
-                    ),
-                    Spawn(
-                        StyledText::builder()
-                            .content("Small")
-                            .font_size(14.0)
-                            .build(),
-                    ),
-                    Spawn(
-                        StyledProgress::builder()
-                            .value(50.)
-                            .size(ProgressSize::Small)
-                            .build(),
-                    ),
-                    Spawn(
-                        StyledText::builder()
-                            .content("Medium")
-                            .font_size(14.0)
-                            .build(),
-                    ),
-                    Spawn(
-                        StyledProgress::builder()
-                            .value(50.)
-                            .size(ProgressSize::Medium)
-                            .build(),
-                    ),
-                    Spawn(
-                        StyledText::builder()
-                            .content("Large")
-                            .font_size(14.0)
-                            .build(),
-                    ),
-                    Spawn(
-                        StyledProgress::builder()
-                            .value(50.)
-                            .size(ProgressSize::Large)
-                            .build(),
-                    ),
-                    Spawn(
-                        StyledText::builder()
-                            .content("XLarge")
-                            .font_size(14.0)
-                            .build(),
-                    ),
-                    Spawn(
-                        StyledProgress::builder()
-                            .value(50.)
-                            .size(ProgressSize::XLarge)
-                            .build(),
-                    ),
-                )),
-            )),
-        )),
-    ));
+                },))
+                .insert(parent_bundle)
+                .insert(select_trigger_bundle)
+                .with_children(|parent| {
+                    parent
+                        .spawn(select_content_bundle)
+                        .with_children(|content| {
+                            for child in child_bundles {
+                                content.spawn(child);
+                            }
+                        });
+                });
+        });
 }

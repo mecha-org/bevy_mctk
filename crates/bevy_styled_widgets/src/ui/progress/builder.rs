@@ -1,3 +1,4 @@
+use super::{ProgressSize, StyledProgress, components::AccessibleName};
 use bevy::{
     color::palettes::css::{GREY, LIGHT_GRAY},
     input_focus::tab_navigation::TabIndex,
@@ -6,8 +7,6 @@ use bevy::{
     winit::cursor::CursorIcon,
 };
 use bevy_core_widgets::hover::Hovering;
-
-use super::{StyledProgress, components::AccessibleName};
 
 #[derive(Component)]
 pub struct ProgressRoot;
@@ -20,6 +19,7 @@ pub struct ProgressBuilder {
     value: f32,
     root_color: Option<Color>,
     indicator_color: Option<Color>,
+    size: Option<ProgressSize>,
 }
 
 impl ProgressBuilder {
@@ -35,6 +35,11 @@ impl ProgressBuilder {
 
     pub fn indicator_color(mut self, color: Color) -> Self {
         self.indicator_color = Some(color);
+        self
+    }
+
+    pub fn size(mut self, size: ProgressSize) -> Self {
+        self.size = Some(size);
         self
     }
 
@@ -54,8 +59,6 @@ impl ProgressBuilder {
                 align_self: AlignSelf::Stretch,
                 align_items: AlignItems::Stretch,
                 justify_items: JustifyItems::Center,
-                height: Val::Px(12.0),
-                width: Val::Percent(100.0),
                 ..default()
             },
             Name::new("Progress"),
@@ -66,6 +69,7 @@ impl ProgressBuilder {
                 value: self.value.clone(),
                 root_color: self.root_color.clone(),
                 indicator_color: self.indicator_color.clone(),
+                size: self.size.clone(),
             },
             TabIndex(0),
             Children::spawn((

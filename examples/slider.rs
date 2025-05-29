@@ -1,4 +1,5 @@
 use bevy::{input_focus::tab_navigation::TabGroup, prelude::*, winit::WinitSettings};
+use bevy_core_widgets::{CoreSlider, InteractionDisabled};
 use bevy_styled_widgets::prelude::*;
 
 fn main() {
@@ -43,8 +44,27 @@ fn set_theme(id: ThemeId) -> impl FnMut(ResMut<ThemeManager>) + Clone {
     }
 }
 
+#[derive(Component)]
+pub struct XLSlider;
+
+fn xl_slider_on_change(
+    In(value): In<f32>,
+    mut query: Query<(&mut StyledSlider, Entity, &mut CoreSlider), With<XLSlider>>,
+    mut commands: Commands,
+) {
+    for (styled_slider, entity, mut core_slider) in &mut query {
+        if styled_slider.disabled {
+            commands.entity(entity).insert(InteractionDisabled);
+            return;
+        } else {
+            core_slider.set_value(value);
+        }
+    }
+}
+
 fn setup_view_root(mut commands: Commands) {
     commands.spawn(Camera2d);
+    let xl_slider_on_change_system = commands.register_system(xl_slider_on_change);
 
     let on_toogle_theme_mode = commands.register_system(toggle_mode);
 
@@ -174,18 +194,143 @@ fn setup_view_root(mut commands: Commands) {
             Spawn((
                 Node {
                     display: Display::Flex,
-                    flex_direction: FlexDirection::Column,
+                    flex_direction: FlexDirection::Row,
                     justify_content: JustifyContent::Start,
                     align_items: AlignItems::Center,
                     align_content: AlignContent::Center,
-                    width: Val::Px(200.), // change this as required
                     padding: UiRect::axes(Val::Px(12.0), Val::Px(0.0)),
+                    column_gap: Val::Px(6.0),
                     ..default()
                 },
                 Children::spawn((Spawn(
-                    StyledSlider::builder().max(100.).min(0.).value(50.).build(),
+                    StyledSlider::builder()
+                        .max(100.)
+                        .min(0.)
+                        .value(50.)
+                        .size(SliderSize::Medium)
+                        .build(),
                 ),)),
             )), // types
+            Spawn(
+                StyledText::builder()
+                    .content("Sizes")
+                    .font_size(24.0)
+                    .build(),
+            ),
+            Spawn((
+                Node {
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Column,
+                    justify_content: JustifyContent::Stretch,
+                    align_items: AlignItems::Stretch,
+                    align_content: AlignContent::Stretch,
+                    padding: UiRect::axes(Val::Px(12.0), Val::Px(12.0)),
+                    column_gap: Val::Px(10.0),
+                    ..default()
+                },
+                Children::spawn((
+                    Spawn(
+                        StyledText::builder()
+                            .content("XSmall")
+                            .font_size(14.0)
+                            .build(),
+                    ),
+                    Spawn(
+                        StyledSlider::builder()
+                            .max(100.)
+                            .min(0.)
+                            .value(50.)
+                            .size(SliderSize::XSmall)
+                            .build(),
+                    ),
+                    Spawn(
+                        StyledText::builder()
+                            .content("Small")
+                            .font_size(14.0)
+                            .build(),
+                    ),
+                    Spawn(
+                        StyledSlider::builder()
+                            .max(100.)
+                            .min(0.)
+                            .value(50.)
+                            .size(SliderSize::Small)
+                            .build(),
+                    ),
+                    Spawn(
+                        StyledText::builder()
+                            .content("Medium")
+                            .font_size(14.0)
+                            .build(),
+                    ),
+                    Spawn(
+                        StyledSlider::builder()
+                            .max(100.)
+                            .min(0.)
+                            .value(50.)
+                            .size(SliderSize::Medium)
+                            .build(),
+                    ),
+                    Spawn(
+                        StyledText::builder()
+                            .content("Large")
+                            .font_size(14.0)
+                            .build(),
+                    ),
+                    Spawn(
+                        StyledSlider::builder()
+                            .max(100.)
+                            .min(0.)
+                            .value(50.)
+                            .size(SliderSize::Large)
+                            .build(),
+                    ),
+                    Spawn(
+                        StyledText::builder()
+                            .content("XLarge")
+                            .font_size(14.0)
+                            .build(),
+                    ),
+                    Spawn((
+                        StyledSlider::builder()
+                            .max(100.)
+                            .min(0.)
+                            .value(50.)
+                            .size(SliderSize::XLarge)
+                            .on_change(xl_slider_on_change_system)
+                            .build(),
+                        XLSlider,
+                    )),
+                )),
+            )),
+            Spawn(
+                StyledText::builder()
+                    .content("Disabled")
+                    .font_size(24.0)
+                    .build(),
+            ),
+            Spawn((
+                Node {
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Row,
+                    justify_content: JustifyContent::Start,
+                    align_items: AlignItems::Center,
+                    align_content: AlignContent::Center,
+                    padding: UiRect::axes(Val::Px(12.0), Val::Px(0.0)),
+                    column_gap: Val::Px(6.0),
+                    ..default()
+                },
+                Children::spawn((Spawn((
+                    StyledSlider::builder()
+                        .max(100.)
+                        .min(0.)
+                        .value(50.)
+                        .size(SliderSize::Large)
+                        .disabled(true)
+                        .build(),
+                    InteractionDisabled,
+                )),)),
+            )),
         )),
     ));
 }
