@@ -6,6 +6,7 @@ pub struct TextBuilder {
     variant: TextVariant,
     content: String,
     color: Option<Color>,
+    font: Option<Handle<Font>>,
     font_size: Option<f32>,
     font_weight: Option<FontWeight>,
     alignment: Option<JustifyText>,
@@ -27,6 +28,11 @@ impl TextBuilder {
 
     pub fn color(mut self, color: Color) -> Self {
         self.color = Some(color);
+        self
+    }
+
+    pub fn font(mut self, font: Handle<Font>) -> Self {
+        self.font = Some(font);
         self
     }
 
@@ -61,19 +67,27 @@ impl TextBuilder {
     }
 
     pub fn build(self) -> impl Bundle {
+        let default_text_font = TextFont::default();
         (
             Text::new(self.content.clone()),
             StyledText {
                 variant: self.variant,
                 color: self.color,
+                font: self.font.clone(),
                 font_size: self.font_size,
                 font_weight: self.font_weight,
                 alignment: self.alignment,
                 line_height: self.line_height,
                 max_width: self.max_width,
                 selectable: self.selectable,
+                content: self.content.clone(),
             },
             Name::new(format!("Text: {}", self.content)),
+            TextFont {
+                font: self.font.unwrap_or(default_text_font.font),
+                font_size: self.font_size.unwrap_or(default_text_font.font_size),
+                ..Default::default()
+            },
         )
     }
 }

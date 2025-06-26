@@ -31,12 +31,14 @@ impl Default for TextVariant {
 pub struct StyledText {
     pub variant: TextVariant,
     pub color: Option<Color>,
+    pub font: Option<Handle<Font>>,
     pub font_size: Option<f32>,
     pub font_weight: Option<FontWeight>,
     pub alignment: Option<JustifyText>,
     pub line_height: Option<f32>,
     pub max_width: Option<f32>,
     pub selectable: bool,
+    pub content: String,
 }
 
 impl StyledText {
