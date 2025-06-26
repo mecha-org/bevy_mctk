@@ -21,3 +21,5 @@ bevy_core_widgets = { git = "https://github.com/viridia/bevy_core_widgets.git", 
 bevy_cosmic_edit = { git = "https://github.com/swet-universe/bevy_cosmic_edit.git", branch = "bevy-compat/v0.16-update" }
 accesskit = "0.18.0"
 bevy_asset_loader = { version = "0.23.0-rc.3", features = ["standard_dynamic_assets"]}
+tokio = { version = "1", features = ["full"] }
+async-std = "1.13.1"

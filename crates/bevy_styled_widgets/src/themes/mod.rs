@@ -1,6 +1,7 @@
 pub mod button;
 pub mod input;
 pub mod panel;
+pub mod popup;
 pub mod styles;
 pub mod text;
 
