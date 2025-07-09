@@ -9,11 +9,18 @@ use super::StyledText;
 
 pub fn update_text_styles(
     theme_manager: Res<ThemeManager>,
-    mut query: Query<(&mut TextFont, &mut TextColor, &mut TextLayout, &StyledText)>,
+    mut query: Query<(
+        &mut Text,
+        &mut TextFont,
+        &mut TextColor,
+        &mut TextLayout,
+        &StyledText,
+    )>,
 ) {
     let theme_styles = &theme_manager.styles;
 
-    for (mut text_font, mut text_color, mut text_layout, styled_text) in query.iter_mut() {
+    for (mut text, mut text_font, mut text_color, mut text_layout, styled_text) in query.iter_mut()
+    {
         let mut style = match styled_text.variant {
             TextVariant::Header1 => TextStyle {
                 font_size: 32.0,
@@ -116,9 +123,14 @@ pub fn update_text_styles(
             style.text_align = alignment;
         }
 
+        if let Some(font) = styled_text.font.clone() {
+            style.font = font;
+        }
+
         // Apply the style to the text component
         text_font.font_size = style.font_size;
         text_color.0 = style.color;
         text_layout.justify = style.text_align;
+        text.0 = styled_text.content.clone();
     }
 }
