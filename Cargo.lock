@@ -705,7 +705,7 @@ dependencies = [
 [[package]]
 name = "bevy_core_widgets"
 version = "0.1.0"
-source = "git+https://github.com/viridia/bevy_core_widgets.git?rev=c8ef2bb82ec9706d1faea22f29f7786645a22538#c8ef2bb82ec9706d1faea22f29f7786645a22538"
+source = "git+https://github.com/akshayr-mecha/bevy_core_widgets.git?rev=24966adefc4494815b9d71bc2bf5814e715f6b43#24966adefc4494815b9d71bc2bf5814e715f6b43"
 dependencies = [
  "accesskit",
  "bevy",
