@@ -705,7 +705,7 @@ dependencies = [
 [[package]]
 name = "bevy_core_widgets"
 version = "0.1.0"
-source = "git+https://github.com/akshayr-mecha/bevy_core_widgets.git?rev=24966adefc4494815b9d71bc2bf5814e715f6b43#24966adefc4494815b9d71bc2bf5814e715f6b43"
+source = "git+https://github.com/akshayr-mecha/bevy_core_widgets.git?rev=3a1e8795ab2ed3ac5fd252e9f5ab7c890a2415f4#3a1e8795ab2ed3ac5fd252e9f5ab7c890a2415f4"
 dependencies = [
  "accesskit",
  "bevy",

@@ -34,7 +34,7 @@ pub fn update_button(
         mut border_color,
         mut border_radius,
         Hovering(is_hovering),
-        ButtonPressed(is_pressed),
+        ButtonPressed { is_pressed, .. },
         is_disabled,
     ) in query.iter_mut()
     {

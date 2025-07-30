@@ -14,7 +14,7 @@ impl SliderStyle {
         Self {
             track_color: colors.primary.with_alpha(0.5),
             thumb_color: colors.primary,
-            filled_color: colors.primary_foreground.with_alpha(0.8),
+            filled_color: colors.foreground.with_alpha(0.8),
             icon_color: colors.primary,
         }
     }

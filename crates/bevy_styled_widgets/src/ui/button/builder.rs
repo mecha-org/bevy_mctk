@@ -13,6 +13,7 @@ use super::{
 pub struct ButtonBuilder {
     variant: ButtonVariant,
     on_click: Option<SystemId>,
+    on_long_press: Option<SystemId>,
     background_color: Option<Color>,
     border_color: Option<Color>,
     hover_background_color: Option<Color>,
@@ -33,6 +34,11 @@ impl ButtonBuilder {
 
     pub fn on_click(mut self, system_id: SystemId) -> Self {
         self.on_click = Some(system_id);
+        self
+    }
+
+    pub fn on_long_press(mut self, system_id: SystemId) -> Self {
+        self.on_long_press = Some(system_id);
         self
     }
 
@@ -117,6 +123,7 @@ impl ButtonBuilder {
             },
             CoreButton {
                 on_click: self.on_click,
+                on_long_press: self.on_long_press,
             },
             AccessibleName(self.text.clone().unwrap_or_else(|| "Button".to_string())),
             TabIndex(0),

@@ -13,7 +13,7 @@ homepage = "https://mecha.so"
 default = []
 
 [dependencies]
-bevy_core_widgets = { git = "https://github.com/akshayr-mecha/bevy_core_widgets.git",  rev = "24966adefc4494815b9d71bc2bf5814e715f6b43" }
+bevy_core_widgets = { git = "https://github.com/akshayr-mecha/bevy_core_widgets.git",  rev = "3a1e8795ab2ed3ac5fd252e9f5ab7c890a2415f4" }
 bevy_additional_core_widgets = { path = "../bevy_additional_core_widgets", version = "0.1.0", default-features = false }
 bevy_cosmic_edit = { git = "https://github.com/swet-universe/bevy_cosmic_edit.git", branch = "bevy-compat/v0.16-update" }
 accesskit = "0.18.0"
