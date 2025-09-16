@@ -6,7 +6,7 @@ use super::ThemeColors;
 pub struct TextStyle {
     pub color: Color,
     pub font_size: f32,
-    pub font: Option<Handle<Font>>,
+    pub font: Handle<Font>,
     pub font_weight: FontWeight,
     pub line_height: f32,
     pub letter_spacing: f32,
@@ -17,7 +17,7 @@ impl TextStyle {
         Self {
             color: colors.foreground,
             font_size: 16.0,
-            font: None,
+            font: TextFont::default().font,
             font_weight: FontWeight::NORMAL,
             line_height: 1.5,
             letter_spacing: 0.0,

@@ -2,6 +2,8 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 
+use crate::themes::popup::PopupStyle;
+
 use super::{
     ThemeModeConfigs,
     button::{ButtonSizeStyles, ButtonVariantStyles, button_sizes},
@@ -9,8 +11,8 @@ use super::{
     input::InputStyle,
     panel::PanelStyle,
     progress::ProgressStyle,
-    slider::SliderStyle,
     radio::{RadioButtonSizeStyles, RadioButtonVariantStyles, radio_button_sizes},
+    slider::SliderStyle,
     switch::{SwitchSizeStyles, SwitchVariantStyles, switch_sizes},
     text::TextStyle,
     toggle::{ToggleSizeStyles, ToggleVariantStyles, toggle_sizes},
@@ -22,6 +24,7 @@ pub struct ThemeStyles {
     pub button_sizes: ButtonSizeStyles,
     pub text: TextStyle,
     pub panel: PanelStyle,
+    pub popup: PopupStyle,
     pub icons: HashMap<String, String>,
     pub switches: SwitchVariantStyles,
     pub switch_sizes: SwitchSizeStyles,
@@ -43,6 +46,7 @@ impl ThemeStyles {
             button_sizes: button_sizes(),
             text: TextStyle::from_colors(configs.colors.clone()),
             panel: PanelStyle::from_colors(configs.colors.clone()),
+            popup: PopupStyle::from_colors(configs.colors.clone()),
             switches: SwitchVariantStyles::from_colors(configs.colors.clone()),
             switch_sizes: switch_sizes(),
             icons: configs.icons.clone(),

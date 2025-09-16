@@ -13,6 +13,6 @@ homepage = "https://mecha.so"
 default = []
 
 [dependencies]
-bevy_core_widgets = { git = "https://github.com/viridia/bevy_core_widgets.git",  rev = "c8ef2bb82ec9706d1faea22f29f7786645a22538" }
+bevy_core_widgets = { git = "https://github.com/akshayr-mecha/bevy_core_widgets.git",  rev = "3a1e8795ab2ed3ac5fd252e9f5ab7c890a2415f4" }
 accesskit = "0.18.0"
 bevy = "0.16.0-dev"
